@@ -1,0 +1,9 @@
+env/
+media/
+logs/
+*.pyc
+__ pycache __
+db.sqlite3
+.DS_Store
+**/migrations/**
+static_root/
