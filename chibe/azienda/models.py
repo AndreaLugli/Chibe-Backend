@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.db import models
+from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from main.models import Tribu, Utente
 
@@ -17,6 +18,8 @@ class Categoria(models.Model):
 
 class Partner(User):
 	ragione_sociale = models.CharField(max_length = 300, blank = True, null = True)
+	codice_fiscale = models.CharField(max_length = 300, blank = True, null = True)
+	partita_iva = models.CharField(max_length = 300, blank = True, null = True)
 	indirizzo = models.CharField(max_length = 300, blank = True, null = True)
 	latitudine = models.CharField(max_length = 300, blank = True, null = True)
 	longitudine = models.CharField(max_length = 300, blank = True, null = True)
@@ -25,12 +28,6 @@ class Partner(User):
 	descrizione = models.TextField(blank = True, null = True)
 	categorie = models.ManyToManyField(Categoria)
 
-	STATUS = (
-		("ABI", "Abilitato"),
-		("BLO", "Bloccato"),
-	)
-
-	status = models.CharField(max_length = 3, choices = STATUS, default = "ABI")
 	is_fornitore = models.BooleanField(default = False)
 	famoco_id = models.CharField(max_length = 300, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
@@ -48,6 +45,18 @@ class Partner(User):
 	class Meta:
 		verbose_name = "Partner"
 		verbose_name_plural = "Partners"
+
+	@staticmethod
+	def post_save(sender, **kwargs):
+		instance = kwargs.get('instance')
+		created = kwargs.get('created')
+		if created:
+			username = instance.username
+			instance.set_password(username)
+			instance.save()
+
+post_save.connect(Partner.post_save, sender=Partner)
+
 
 class Supervisore(models.Model):
 	etichetta = models.CharField(max_length = 300, blank = True, null = True)
@@ -72,4 +81,22 @@ class Acquisto(models.Model):
 	class Meta:
 		verbose_name = "Acquisto"
 		verbose_name_plural = "Acquisti"
+
+class ContrattoMarketing(models.Model):
+	partners = models.ManyToManyField(Partner)
+	percentuale_marketing = models.FloatField(default = 0)
+	inizio = models.DateField()
+	fine = models.DateField()
+	tacito_rinnovo = models.BooleanField(default = True)
+
+	PERIODO_FATTURAZIONE = (
+		("15", "15 giorni"),
+		("30", "30 giorni"),
+		("60", "60 giorni"),
+		("90", "90 giorni"),
+	)
+
+	fatturazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
+	documentazione_traffico_acquisti = models.BooleanField(default = True)
+	periodo_documentazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
 

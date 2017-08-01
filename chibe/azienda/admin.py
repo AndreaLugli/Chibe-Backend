@@ -6,7 +6,7 @@ from .models import Partner, Categoria
 
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
-	fields = ["first_name", "last_name", "ragione_sociale", "username", "password", "indirizzo", "latitudine", "longitudine", "telefono_fisso", "telefono_cellulare", "descrizione", "categorie", "status", "is_fornitore", "famoco_id", "tribu"]
+	fields = ["first_name", "last_name", "ragione_sociale", "codice_fiscale", "partita_iva", "username", "indirizzo", "latitudine", "longitudine", "telefono_fisso", "telefono_cellulare", "descrizione", "categorie", "is_fornitore", "famoco_id", "tribu"]
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):

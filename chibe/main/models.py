@@ -59,6 +59,9 @@ class Gruppo(models.Model):
 	desiderio = models.ForeignKey(Desiderio)
 	utente_admin = models.ForeignKey(Utente, related_name = "utente_admin")
 	utenti = models.ManyToManyField(Utente, related_name = "utenti")
+	#punti = models.IntegerField(default = 0)
+	# gli utenti possono inviare dei punti al gruppo (in modo irrevocabile) a meno che il desiderio non venga annullato
+	# in quel caso i punti devono essere stornati.
 
 	class Meta:
 		verbose_name = "Gruppo"
@@ -75,6 +78,7 @@ class Rubrica(models.Model):
 class OrdineDesiderio(models.Model):
 	timestamp = models.DateTimeField(auto_now_add = True)
 	gruppo = models.ForeignKey(Gruppo)
+	partner_ritirato = models.ForeignKey("azienda.Partner", blank = True, null = True)
 
 	class Meta:
 		verbose_name = "Ordine desideiro"
