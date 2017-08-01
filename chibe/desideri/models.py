@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 
-class CategoriaPremio(models.Model):
+class CategoriaDesiderio(models.Model):
 	nome = models.CharField(max_length = 300)
 	id_immagine = models.CharField(max_length = 300)
 	descrizione = models.TextField(blank = True, null = True)
@@ -11,16 +11,16 @@ class CategoriaPremio(models.Model):
 		return self.nome	
 
 	class Meta:
-		verbose_name = "Categoria premio"
-		verbose_name_plural = "Categorie premio"	
+		verbose_name = "Categoria desiderio"
+		verbose_name_plural = "Categorie desiderio"	
 
-class Premio(models.Model):
+class Desiderio(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione_breve = models.TextField(blank = True, null = True)
 	descrizione_lunga = models.TextField(blank = True, null = True)
 	punti = models.IntegerField()
 	immagine = models.CharField(max_length = 300, blank = True, null = True)
-	categoria = models.ForeignKey(CategoriaPremio)
+	categoria = models.ForeignKey(CategoriaDesiderio)
 	data_inizio = models.DateField
 	data_fine = models.DateField()
 	in_evidenza = models.BooleanField(default = False)
@@ -37,8 +37,8 @@ class Premio(models.Model):
 		return self.nome
 
 	class Meta:
-		verbose_name = "Premio"
-		verbose_name_plural = "Premi"	
+		verbose_name = "Desiderio"
+		verbose_name_plural = "Desideri"	
 
 
 

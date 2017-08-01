@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
-from premi.models import Premio
+from desideri.models import Desiderio
 
 class Provincia(models.Model):
 	nome = models.CharField(max_length = 2)
@@ -29,7 +29,7 @@ class Tribu(models.Model):
 		verbose_name = "Tribù"
 		verbose_name_plural = "Tribù"	
 
-class Studente(User):
+class Utente(User):
 	avatar = models.CharField(max_length = 300, blank = True, null = True)
 	classe = models.CharField(max_length = 300, blank = True, null = True)
 	telefono_cellulare = models.CharField(max_length = 300, blank = True, null = True)
@@ -52,33 +52,33 @@ class Studente(User):
 	#Login con Google Account (token)
 
 	class Meta:
-		verbose_name = "Studente"
-		verbose_name_plural = "Studenti"
+		verbose_name = "Utente"
+		verbose_name_plural = "Utente"
 
 class Gruppo(models.Model):
-	premio = models.ForeignKey(Premio)
-	studente_admin = models.ForeignKey(Studente, related_name = "studente_admin")
-	studenti = models.ManyToManyField(Studente, related_name = "studenti")
+	desiderio = models.ForeignKey(Desiderio)
+	utente_admin = models.ForeignKey(Utente, related_name = "utente_admin")
+	utenti = models.ManyToManyField(Utente, related_name = "utenti")
 
 	class Meta:
 		verbose_name = "Gruppo"
 		verbose_name_plural = "Gruppi"	
 
 class Rubrica(models.Model):
-	studente = models.ForeignKey(Studente, related_name = "studente_gruppo")
-	studenti = models.ManyToManyField(Studente, related_name = "studenti_gruppo")
+	utente = models.ForeignKey(Utente, related_name = "utente_gruppo")
+	utenti = models.ManyToManyField(Utente, related_name = "utenti_gruppo")
 
 	class Meta:
 		verbose_name = "Rubrica"
 		verbose_name_plural = "Rubriche"	
 
-class OrdinePremio(models.Model):
+class OrdineDesiderio(models.Model):
 	timestamp = models.DateTimeField(auto_now_add = True)
 	gruppo = models.ForeignKey(Gruppo)
 
 	class Meta:
-		verbose_name = "Ordine premio"
-		verbose_name_plural = "Ordini premio"	
+		verbose_name = "Ordine desideiro"
+		verbose_name_plural = "Ordini desideri"	
 
 
 

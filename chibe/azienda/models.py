@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
-from main.models import Tribu, Studente
+from main.models import Tribu, Utente
 
 class Categoria(models.Model):
 	nome = models.CharField(max_length = 300)
@@ -63,7 +63,7 @@ class Acquisto(models.Model):
 	categoria = models.ForeignKey(Categoria)
 	importo = models.DecimalField(max_digits=10, decimal_places=2)
 	partner = models.ForeignKey(Partner) 
-	studente = models.ForeignKey(Studente) 
+	utente = models.ForeignKey(Utente) 
 	timestamp = models.DateTimeField(auto_now_add = True)
 
 	def __unicode__(self):

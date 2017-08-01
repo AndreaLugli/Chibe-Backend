@@ -17,7 +17,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'azienda',
     'main',
-    'premi'
+    'desideri'
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
