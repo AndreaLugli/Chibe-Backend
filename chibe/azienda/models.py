@@ -15,7 +15,7 @@ class Categoria(models.Model):
 		verbose_name = "Categoria"
 		verbose_name_plural = "Categorie"
 
-class Esercente(User):
+class Partner(User):
 	ragione_sociale = models.CharField(max_length = 300, blank = True, null = True)
 	indirizzo = models.CharField(max_length = 300, blank = True, null = True)
 	latitudine = models.CharField(max_length = 300, blank = True, null = True)
@@ -46,14 +46,14 @@ class Esercente(User):
 		return self.ragione_sociale
 
 	class Meta:
-		verbose_name = "Esercente"
-		verbose_name_plural = "Esercenti"
+		verbose_name = "Partner"
+		verbose_name_plural = "Partners"
 
 class Supervisore(models.Model):
 	etichetta = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione = models.TextField(blank = True, null = True)
 	token = models.CharField(max_length = 300, blank = True, null = True)
-	esercenti = models.ManyToManyField(Esercente)
+	partner = models.ManyToManyField(Partner)
 
 	class Meta:
 		verbose_name = "Supervisore"
@@ -62,7 +62,7 @@ class Supervisore(models.Model):
 class Acquisto(models.Model):
 	categoria = models.ForeignKey(Categoria)
 	importo = models.DecimalField(max_digits=10, decimal_places=2)
-	esercente = models.ForeignKey(Esercente) 
+	partner = models.ForeignKey(Partner) 
 	studente = models.ForeignKey(Studente) 
 	timestamp = models.DateTimeField(auto_now_add = True)
 
