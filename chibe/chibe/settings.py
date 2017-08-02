@@ -1,5 +1,8 @@
 from django.contrib.messages import constants as messages
 import os
+import socket
+local_name = socket.gethostname()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '033kmmu)ihh*sgv&9v7y%9fb5-z5al!vorefc7h_()@+82o#o_'
 
@@ -74,9 +77,19 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
+ADMINS = (
+	('Riccardo Russo', 'senblet@gmail.com'),
+)
 
-import socket
-local_name = socket.gethostname()
+MANAGERS = ADMINS
+SERVER_EMAIL = 'chibe@chibeapp.com'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.chibeapp.com'
+EMAIL_HOST_USER = 'chibe@chibeapp.com'
+EMAIL_HOST_PASSWORD = 'sf3o4ow%tdfbxcv4675ioerj'
+EMAIL_PORT = 587
+
+
 
 if (local_name == "Riccardos-MacBook-Pro.local") or (local_name == "Riccardos-MBP") or (local_name == "Riccardos-MBP.lan") or (local_name == "Riccardos-MBP.station"):
 	from settings_locale import *
