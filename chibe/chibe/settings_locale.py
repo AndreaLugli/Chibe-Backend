@@ -16,7 +16,6 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_ROOT = "/Users/riccardo/Desktop/chibe/chibe/media" 
-STATIC_ROOT = "/Users/riccardo/Desktop/chibe/chibe/static"
 
 LOGGING = {
 	'version': 1,
