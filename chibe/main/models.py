@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from desideri.models import Desiderio
 
 class Provincia(models.Model):
-	nome = models.CharField(max_length = 2)
+	nome = models.CharField(max_length = 200)
+	codice = models.CharField(max_length = 2)
 	attivo = models.BooleanField(default = True)
 
 class Scuola(models.Model):
@@ -85,7 +86,15 @@ class OrdineDesiderio(models.Model):
 		verbose_name_plural = "Ordini desideri"	
 
 
+class OnBoard(models.Model):
+	utente = models.ForeignKey(Utente)
+	complete = models.BooleanField(default = False)
+	step_1 = models.BooleanField(default = False, verbose_name = "Dati personali")
+	step_2 = models.BooleanField(default = False, verbose_name = "Avatar")
+	step_3 = models.BooleanField(default = False, verbose_name = "Provincia")
 
+	def __unicode__(self):
+		return self.member.email
 
 
 
