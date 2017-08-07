@@ -8,7 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core import serializers
 from random import randint
-from .models import Utente, OnBoard, Provincia
+from .models import Utente, OnBoard
+from .models import Provincia, Scuola
 
 class utente_register(View):
 	@method_decorator(csrf_exempt)
@@ -49,6 +50,11 @@ class utente_register(View):
 		)
 
 		OnBoard.objects.create(utente = utente_obj)
+
+		user = authenticate(request, username=username, password=password_1)
+
+		if user is not None:
+			login(request, user)		
 
 		return HttpResponse()
 
@@ -113,7 +119,21 @@ class utente_province(View):
 	def get(self, request, *args, **kwargs):
 
 		province = Provincia.objects.filter(attivo = True)
-		data = serializers.serialize('json', province, fields=('id', 'nome', 'codice'))	
+		data = serializers.serialize('json', province, fields=('id', 'nome', 'codice'))
+
+		return HttpResponse(data)
+
+class utente_province_id(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_province_id, self).dispatch(*args, **kwargs)
+
+	def get(self, request, id, *args, **kwargs):
+
+		provincia = Provincia.objects.get(pk = id)
+
+		scuole = Scuola.objects.filter(provincia = provincia)
+		data = serializers.serialize('json', scuole, fields=('id', 'nome'))
 
 		return HttpResponse(data)
 
@@ -123,5 +143,28 @@ class utente_step3(View):
 		return super(utente_step3, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
+		#user = request.user
+		#username = user.username
+		username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		provincia_id = request.POST['provincia_id']
+		provincia = Provincia.objects.get(pk = provincia_id)
+
+		scuola_id = request.POST['scuola_id']
+		scuola = Scuola.objects.get(pk = scuola_id)
+
+		classe = request.POST.get("classe", None)
+		newsletter = request.POST.get("newsletter", None)
+
+		utente.classe = classe
+		utente.provincia = provincia
+		utente.scuola = scuola
+		utente.save()
+
+		onboard_obj = OnBoard.objects.get(utente = utente)
+		onboard_obj.step_3 = True
+		onboard_obj.complete = True
+		onboard_obj.save()
 
 		return HttpResponse()

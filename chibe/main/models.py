@@ -9,6 +9,9 @@ class Provincia(models.Model):
 	codice = models.CharField(max_length = 2)
 	attivo = models.BooleanField(default = True)
 
+	def __unicode__(self):
+		return self.nome
+
 class Scuola(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
 	provincia = models.ForeignKey(Provincia, blank = True, null = True)
@@ -94,7 +97,7 @@ class OnBoard(models.Model):
 	step_3 = models.BooleanField(default = False, verbose_name = "Provincia")
 
 	def __unicode__(self):
-		return self.member.email
+		return self.utente.email
 
 
 

@@ -35,9 +35,9 @@ class azienda_categorie(View):
 		return super(azienda_categorie, self).dispatch(*args, **kwargs)
 
 	def get(self, request, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "868051020276493"
+		user = request.user
+		username = user.username
+		#username = "868051020276493"
 		partner = Partner.objects.get(username = username)
 		
 		categorie = partner.categorie.all()
@@ -51,9 +51,9 @@ class azienda_pagamento(View):
 		return super(azienda_pagamento, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "868051020276493"
+		user = request.user
+		username = user.username
+		#username = "868051020276493"
 		partner = Partner.objects.get(username = username)
 
 		categoria_id = request.POST['categoria_id']
