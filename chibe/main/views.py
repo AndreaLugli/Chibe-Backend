@@ -11,6 +11,65 @@ from random import randint
 from .models import Utente, OnBoard
 from .models import Provincia, Scuola
 
+def check_connected(request):
+	if request.user.is_authenticated():
+		
+		username = request.user.username
+		utente = Utente.objects.get(username = username)
+		onboard = OnBoard.objects.get(utente = utente)
+
+		complete = onboard.complete
+		step_1 = onboard.step_1
+		step_2 = onboard.step_2
+		step_3 = onboard.step_3
+
+		if complete:
+			output = 0
+		elif not step_1:
+			output = 1
+		elif not step_2:
+			output = 2
+		elif not step_3:
+			output = 3
+
+		return HttpResponse(output)
+	else:
+		return HttpResponse('Unauthorized', status=401)
+
+class utente_login(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_login, self).dispatch(*args, **kwargs)
+
+	def post(self, request, *args, **kwargs):
+		username = request.POST.get("username", None)
+		password = request.POST.get("password", None)
+
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+
+			utente = Utente.objects.get(username = username)
+			onboard = OnBoard.objects.get(utente = utente)
+
+			complete = onboard.complete
+			step_1 = onboard.step_1
+			step_2 = onboard.step_2
+			step_3 = onboard.step_3
+
+			if complete:
+				output = 0
+			elif not step_1:
+				output = 1
+			elif not step_2:
+				output = 2
+			elif not step_3:
+				output = 3
+
+			return HttpResponse(output)
+		else:
+			return HttpResponse('Unauthorized', status=401)
+
 class utente_register(View):
 	@method_decorator(csrf_exempt)
 	def dispatch(self, *args, **kwargs):
