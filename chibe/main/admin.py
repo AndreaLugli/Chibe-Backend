@@ -6,7 +6,7 @@ from .models import Utente, OnBoard, Provincia, Scuola
 
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
-	list_display = ['username', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe']
+	list_display = ['username', 'avatar', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe']
 
 @admin.register(OnBoard)
 class OnBoardAdmin(admin.ModelAdmin):

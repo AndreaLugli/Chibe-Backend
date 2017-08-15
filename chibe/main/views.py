@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.views.generic import View
@@ -7,9 +6,16 @@ from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core import serializers
+from datetime import datetime
 from random import randint
 from .models import Utente, OnBoard
 from .models import Provincia, Scuola
+from django.conf import settings
+import StringIO
+from PIL import Image
+import hashlib
+
+AVATAR_MEDIA_ROOT = settings.MEDIA_ROOT + "/avatar"
 
 def check_connected(request):
 	if request.user.is_authenticated():
@@ -131,9 +137,9 @@ class utente_step1(View):
 		return super(utente_step1, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		nome = request.POST['nome']
@@ -157,12 +163,15 @@ class utente_step2(View):
 		return super(utente_step2, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		#Gestione avatar
+		avatar = request.POST.get("avatar", None)
+		utente.avatar = avatar
+		utente.save()
 
 		onboard_obj = OnBoard.objects.get(utente = utente)
 		onboard_obj.step_2 = True
@@ -202,9 +211,9 @@ class utente_step3(View):
 		return super(utente_step3, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		provincia_id = request.POST['provincia_id']
@@ -227,3 +236,38 @@ class utente_step3(View):
 		onboard_obj.save()
 
 		return HttpResponse()
+
+@csrf_exempt
+def upload_picture(request):
+
+	f = request.FILES['file']
+
+	str = ""
+	for c in f.chunks():
+		str += c
+	imagefile  = StringIO.StringIO(str)
+	image = Image.open(imagefile)
+
+	now = datetime.now()
+	now_formatted = now.strftime("%Y-%m-%d_%H-%M")
+	token = hashlib.sha224(now_formatted).hexdigest()	
+	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
+	image.save(outfile, "JPEG")	
+
+	output = "/media/avatar/" + token + '.jpg'
+
+	return HttpResponse(output)
+
+def get_code(request):
+	user = request.user
+	username = user.username
+	#username = "bella"
+	utente = Utente.objects.get(username = username)
+	codice = utente.codice
+	#codice = "Ciaone"
+	return HttpResponse(codice)
+
+
+
+
+
