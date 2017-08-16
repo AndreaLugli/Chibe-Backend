@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib import admin
 
-from .models import Partner, Categoria
+from .models import Partner, Categoria, ContrattoMarketing
 
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
@@ -10,4 +10,8 @@ class PartnerAdmin(admin.ModelAdmin):
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
+	pass
+
+@admin.register(ContrattoMarketing)
+class ContrattoMarketingAdmin(admin.ModelAdmin):
 	pass

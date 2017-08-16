@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from main.models import Tribu, Utente
+from datetime import date
+from haversine import haversine
 
 class Categoria(models.Model):
 	nome = models.CharField(max_length = 300)
@@ -16,27 +18,72 @@ class Categoria(models.Model):
 		verbose_name = "Categoria"
 		verbose_name_plural = "Categorie"
 
+
+class SearchQueryset(models.query.QuerySet):
+	def search(self, lat, lon, limite):
+		lat = float(lat)
+		lon = float(lon)
+		limite = float(limite)
+		center_point = (lat, lon)
+
+		result_list = []
+
+		dict_distanza = {}
+
+		for su in self:
+			point = (su.latitudine, su.longitudine)
+			distanza = haversine(center_point, point)
+
+			if distanza < limite:
+
+				json_su = {
+					"id" : su.id,
+					"foto" : str(su.foto),
+					"descrizione" : su.descrizione,
+					"telefono" : su.telefono_fisso,
+					"ragione_sociale" : su.ragione_sociale,
+					"indirizzo" : su.indirizzo,
+					"distanza" : distanza,
+					"tribu_1" : su.tribu_1,
+					"tribu_2" : su.tribu_2,
+					"tribu_3" : su.tribu_3,
+					"tribu_4" : su.tribu_4
+				}
+
+				result_list.append(json_su)
+
+		return result_list
+
+class PartneroManager(models.Manager):
+	def get_queryset(self):
+		return SearchQueryset(self.model, using=self._db)
+
+	def search(self, lat, lon, limite):
+		return self.get_queryset().search(lat, lon, limite)
+
 class Partner(User):
+	objects_search = PartneroManager()
 	ragione_sociale = models.CharField(max_length = 300, blank = True, null = True)
 	codice_fiscale = models.CharField(max_length = 300, blank = True, null = True)
 	partita_iva = models.CharField(max_length = 300, blank = True, null = True)
 	indirizzo = models.CharField(max_length = 300, blank = True, null = True)
-	latitudine = models.CharField(max_length = 300, blank = True, null = True)
-	longitudine = models.CharField(max_length = 300, blank = True, null = True)
+	latitudine = models.FloatField(blank = True, null = True)
+	longitudine = models.FloatField(blank = True, null = True)
 	telefono_fisso = models.CharField(max_length = 300, blank = True, null = True)
 	telefono_cellulare = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione = models.TextField(blank = True, null = True)
 	categorie = models.ManyToManyField(Categoria)
+	foto = models.ImageField(blank = True, null = True)
 
 	is_fornitore = models.BooleanField(default = False)
 	famoco_id = models.CharField(max_length = 300, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
 
-	# Totale punti spesi Tribù 1
-	# Totale punti spesi Tribù 2
-	# Totale punti spesi Tribù 3
-	# Totale punti spesi Tribù 4
-	# Totale punti spesi Tribù 5 (da definire le tribù)
+	tribu_1 = models.IntegerField(default=0)
+	tribu_2 = models.IntegerField(default=0)
+	tribu_3 = models.IntegerField(default=0)
+	tribu_4 = models.IntegerField(default=0)
+
 
 
 	def __unicode__(self):
@@ -99,4 +146,10 @@ class ContrattoMarketing(models.Model):
 	fatturazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
 	documentazione_traffico_acquisti = models.BooleanField(default = True)
 	periodo_documentazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
+
+	def is_valid(self):
+		fine = self.fine
+		today = date.today()
+
+		return today < fine
 

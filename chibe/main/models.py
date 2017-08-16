@@ -102,6 +102,3 @@ class OnBoard(models.Model):
 
 
 
-
-
-
