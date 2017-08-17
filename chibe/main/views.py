@@ -276,6 +276,8 @@ def search_amico(request):
 
 	amico = request.GET.get("amico", None)
 
+	amici = utente.amici.filter().values_list("id", flat = True)
+
 	utenti = Utente.objects.filter(
 		Q(email__icontains=amico) |
 		Q(first_name__icontains=amico) |
@@ -283,8 +285,46 @@ def search_amico(request):
 		Q(username__icontains=amico) |
 		Q(telefono_cellulare__icontains=amico) |
 		Q(codice__icontains=amico)
-	).exclude(username = username).values("username", "id", "first_name", "last_name")
-
+	).exclude(username = username).exclude(pk__in=amici).values("username", "id", "first_name", "last_name")
 
 	return JsonResponse(list(utenti), safe = False)
 
+def utente_amici(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	amici = utente.amici.all().values("username", "id", "first_name", "last_name")
+
+	return JsonResponse(list(amici), safe = False)
+
+@csrf_exempt
+def utente_amico_add(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	id_amico = request.POST['id_amico']
+	amico = Utente.objects.get(pk = id_amico)
+
+	utente.amici.add(amico)
+
+	return HttpResponse()
+
+@csrf_exempt
+def utente_amico_delete(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	id_amico = request.POST['id_amico']
+	amico = Utente.objects.get(pk = id_amico)
+
+	utente.amici.remove(amico)
+
+	return HttpResponse()
+
+	

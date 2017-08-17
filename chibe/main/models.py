@@ -52,6 +52,8 @@ class Utente(User):
 	scuola = models.ForeignKey(Scuola, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
 
+	amici = models.ManyToManyField("self", blank = True)
+
 	#Login con Facebook (token)
 	#Login con Google Account (token)
 
@@ -98,7 +100,6 @@ class OnBoard(models.Model):
 
 	def __unicode__(self):
 		return self.utente.email
-
 
 
 
