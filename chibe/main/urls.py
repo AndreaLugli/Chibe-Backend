@@ -6,6 +6,7 @@ from .views import utente_province, utente_province_id
 from .views import utente_step1, utente_step2, utente_step3
 from .views import upload_picture
 from .views import get_code
+from .views import search_amico
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -18,5 +19,7 @@ urlpatterns = [
 	url(r'^step2/', utente_step2.as_view(), name = "utente_step2"),	
 	url(r'^step3/', utente_step3.as_view(), name = "utente_step3"),	
 	url(r'^get_code/$', get_code, name = 'get_code'),	
+	url(r'^search_amico/$', search_amico, name = 'search_amico'),	
+
 ]
 

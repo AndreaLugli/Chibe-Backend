@@ -13,6 +13,7 @@ from .models import Provincia, Scuola
 from django.conf import settings
 import StringIO
 from PIL import Image
+from django.db.models import Q
 import hashlib
 
 AVATAR_MEDIA_ROOT = settings.MEDIA_ROOT + "/avatar"
@@ -137,9 +138,9 @@ class utente_step1(View):
 		return super(utente_step1, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		user = request.user
-		username = user.username
-		#username = "bella"
+		#user = request.user
+		#username = user.username
+		username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		nome = request.POST['nome']
@@ -163,9 +164,9 @@ class utente_step2(View):
 		return super(utente_step2, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		user = request.user
-		username = user.username
-		#username = "bella"
+		#user = request.user
+		#username = user.username
+		username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		#Gestione avatar
@@ -211,9 +212,9 @@ class utente_step3(View):
 		return super(utente_step3, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		user = request.user
-		username = user.username
-		#username = "bella"
+		#user = request.user
+		#username = user.username
+		username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		provincia_id = request.POST['provincia_id']
@@ -259,15 +260,31 @@ def upload_picture(request):
 	return HttpResponse(output)
 
 def get_code(request):
-	user = request.user
-	username = user.username
-	#username = "bella"
+	#user = request.user
+	#username = user.username
+	username = "bella"
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
 	#codice = "Ciaone"
 	return HttpResponse(codice)
 
+def search_amico(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	amico = request.GET.get("amico", None)
+
+	utenti = Utente.objects.filter(
+		Q(email__icontains=amico) |
+		Q(first_name__icontains=amico) |
+		Q(last_name__icontains=amico) |
+		Q(username__icontains=amico) |
+		Q(telefono_cellulare__icontains=amico) |
+		Q(codice__icontains=amico)
+	).exclude(username = username).values("username", "id", "first_name", "last_name")
 
 
-
+	return JsonResponse(list(utenti), safe = False)
 
