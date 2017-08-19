@@ -37,6 +37,7 @@ class Utente(User):
 	avatar = models.CharField(max_length = 300, blank = True, null = True)
 	classe = models.CharField(max_length = 300, blank = True, null = True)
 	telefono_cellulare = models.CharField(max_length = 300, blank = True, null = True)
+	descrizione = models.TextField(blank = True, null = True)
 
 	STATUS = (
 		("ABI", "Abilitato"),
@@ -51,6 +52,7 @@ class Utente(User):
 	provincia = models.ForeignKey(Provincia, blank = True, null = True)
 	scuola = models.ForeignKey(Scuola, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
+	tribu_timestamp = models.DateTimeField(blank = True, null = True)
 
 	amici = models.ManyToManyField("self", blank = True)
 

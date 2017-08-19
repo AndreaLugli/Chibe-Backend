@@ -9,6 +9,7 @@ from .views import get_code
 from .views import search_amico
 from .views import utente_amici
 from .views import utente_amico_add, utente_amico_delete
+from .views import utente_info
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -25,5 +26,7 @@ urlpatterns = [
 	url(r'^amici/$', utente_amici, name = 'amici'),	
 	url(r'^amico/add/$', utente_amico_add, name = 'utente_amico_add'),	
 	url(r'^amico/delete/$', utente_amico_delete, name = 'utente_amico_delete'),	
+
+	url(r'^info/$', utente_info, name = 'utente_info'),	
 ]
 

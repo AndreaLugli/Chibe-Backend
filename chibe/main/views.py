@@ -327,4 +327,25 @@ def utente_amico_delete(request):
 
 	return HttpResponse()
 
+@csrf_exempt
+def utente_info(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	json_utente = {
+		"id" : utente.id,
+		"avatar" : utente.avatar,
+		"username" : utente.username,
+		"descrizione" : utente.descrizione,
+		"nome" : utente.first_name,
+		"cognome" : utente.last_name,
+		"punti" : utente.punti,
+		"tribu" : utente.tribu
+	}
+
+	return JsonResponse(json_utente)	
+
+
 	
