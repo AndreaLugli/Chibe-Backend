@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.core import serializers
 from datetime import datetime
 from random import randint
-from .models import Utente, OnBoard
+from .models import Utente, OnBoard, Tribu
 from .models import Provincia, Scuola
 from django.conf import settings
 import StringIO
@@ -342,10 +342,37 @@ def utente_info(request):
 		"nome" : utente.first_name,
 		"cognome" : utente.last_name,
 		"punti" : utente.punti,
-		"tribu" : utente.tribu
+		"tribu" : utente.tribu.nome
 	}
 
 	return JsonResponse(json_utente)	
 
+@csrf_exempt
+def utente_tribu(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
 
-	
+	tribu = request.POST['tribu']
+
+	#orsi
+	#aquile
+	#lupi
+	#puma
+	#volpi
+
+	tribu_obj = Tribu.objects.get(nome__iexact = tribu)
+	tribu_timestamp = datetime.now().date()
+
+	utente.tribu = tribu_obj
+	utente.tribu_timestamp = tribu_timestamp
+	utente.save()
+
+
+	return HttpResponse()
+
+
+
+
+

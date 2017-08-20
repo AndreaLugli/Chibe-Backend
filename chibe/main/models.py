@@ -52,7 +52,7 @@ class Utente(User):
 	provincia = models.ForeignKey(Provincia, blank = True, null = True)
 	scuola = models.ForeignKey(Scuola, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
-	tribu_timestamp = models.DateTimeField(blank = True, null = True)
+	tribu_timestamp = models.DateField(blank = True, null = True)
 
 	amici = models.ManyToManyField("self", blank = True)
 
