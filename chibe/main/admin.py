@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib import admin
 
-from .models import Utente, OnBoard, Provincia, Scuola, Tribu
+from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo
 
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
@@ -23,3 +23,8 @@ class ScuolaAdmin(admin.ModelAdmin):
 @admin.register(Tribu)
 class TribuAdmin(admin.ModelAdmin):
 	pass
+
+@admin.register(Gruppo)
+class GruppoAdmin(admin.ModelAdmin):
+	list_display = ['desiderio', 'utente_admin', 'punti']
+

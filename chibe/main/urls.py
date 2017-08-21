@@ -11,6 +11,8 @@ from .views import utente_amici
 from .views import utente_amico_add, utente_amico_delete
 from .views import utente_info
 from .views import utente_tribu
+from .views import utente_modifica
+from .views import utente_desideri
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -29,6 +31,7 @@ urlpatterns = [
 	url(r'^amico/delete/$', utente_amico_delete, name = 'utente_amico_delete'),	
 	url(r'^info/$', utente_info, name = 'utente_info'),	
 	url(r'^tribu/$', utente_tribu, name = 'utente_tribu'),	
-	
+	url(r'^modifica/$', utente_modifica, name = 'utente_modifica'),	
+	url(r'^desideri/$', utente_desideri, name = 'utente_desideri'),	
 ]
 

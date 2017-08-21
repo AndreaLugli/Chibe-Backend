@@ -10,6 +10,7 @@ from datetime import datetime
 from random import randint
 from .models import Utente, OnBoard, Tribu
 from .models import Provincia, Scuola
+from .models import Gruppo
 from django.conf import settings
 import StringIO
 from PIL import Image
@@ -334,6 +335,16 @@ def utente_info(request):
 	username = "bella"
 	utente = Utente.objects.get(username = username)
 
+	modifica_tribu = None
+
+	tribu_timestamp = utente.tribu_timestamp
+	if tribu_timestamp:
+		now = datetime.now().date()
+		diff = now - tribu_timestamp
+		days = diff.days
+		if days >= 60:
+			modifica_tribu = True
+
 	json_utente = {
 		"id" : utente.id,
 		"avatar" : utente.avatar,
@@ -342,7 +353,8 @@ def utente_info(request):
 		"nome" : utente.first_name,
 		"cognome" : utente.last_name,
 		"punti" : utente.punti,
-		"tribu" : utente.tribu.nome
+		"tribu" : utente.tribu.nome,
+		"modifica_tribu" : modifica_tribu
 	}
 
 	return JsonResponse(json_utente)	
@@ -369,10 +381,32 @@ def utente_tribu(request):
 	utente.tribu_timestamp = tribu_timestamp
 	utente.save()
 
+	return HttpResponse()
+
+@csrf_exempt
+def utente_modifica(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	descrizione = request.POST['descrizione']
+
+	utente.descrizione = descrizione
+	utente.save()
+
 
 	return HttpResponse()
 
+@csrf_exempt
+def utente_desideri(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
 
+	gruppi = Gruppo.objects.filter(utenti = utente).values("punti", "desiderio__nome", "id")
 
+	return JsonResponse(list(gruppi), safe = False)
 
 

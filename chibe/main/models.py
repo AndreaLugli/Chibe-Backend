@@ -67,9 +67,7 @@ class Gruppo(models.Model):
 	desiderio = models.ForeignKey(Desiderio)
 	utente_admin = models.ForeignKey(Utente, related_name = "utente_admin")
 	utenti = models.ManyToManyField(Utente, related_name = "utenti")
-	#punti = models.IntegerField(default = 0)
-	# gli utenti possono inviare dei punti al gruppo (in modo irrevocabile) a meno che il desiderio non venga annullato
-	# in quel caso i punti devono essere stornati.
+	punti = models.IntegerField(default = 0)
 
 	class Meta:
 		verbose_name = "Gruppo"

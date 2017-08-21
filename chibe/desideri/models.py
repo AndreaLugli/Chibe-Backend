@@ -18,7 +18,7 @@ class Desiderio(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione_breve = models.TextField(blank = True, null = True)
 	descrizione_lunga = models.TextField(blank = True, null = True)
-	#punti = models.IntegerField() = COSTO RISCATTO / COSTO PUNTO PIUMA
+	
 	costo_acquisto = models.DecimalField(max_digits=10, decimal_places=2)
 	costo_listino = models.DecimalField(max_digits=10, decimal_places=2)
 	costo_riscatto = models.DecimalField(max_digits=10, decimal_places=2)
