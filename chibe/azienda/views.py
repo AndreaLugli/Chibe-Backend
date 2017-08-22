@@ -25,8 +25,8 @@ class azienda_login(View):
 		user = authenticate(request, username=imei, password=imei)
 
 		if user is not None:
-			#username = user.username
-			username = "868051020276493"
+			username = user.username
+			#username = "868051020276493"
 			partner = Partner.objects.get(username = username)
 
 			esistono_contratti = ContrattoMarketing.objects.filter(partners = partner).exists()
@@ -49,9 +49,9 @@ class azienda_categorie(View):
 		return super(azienda_categorie, self).dispatch(*args, **kwargs)
 
 	def get(self, request, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "868051020276493"
+		user = request.user
+		username = user.username
+		#username = "868051020276493"
 		partner = Partner.objects.get(username = username)
 		
 		categorie = partner.categorie.all()
@@ -70,8 +70,6 @@ class azienda_search(View):
 		distanza = float(100)
 
 		partners = Partner.objects_search.search(latitude, longitude, distanza)
-
-		#data = serializers.serialize('json', partners, fields = ("distanza"))
 
 		return JsonResponse(partners, safe = False)
 
@@ -105,9 +103,9 @@ class azienda_pagamento(View):
 		return super(azienda_pagamento, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "868051020276493"
+		user = request.user
+		username = user.username
+		#username = "868051020276493"
 		partner = Partner.objects.get(username = username)
 
 		categoria_id = request.POST['categoria_id']
@@ -156,14 +154,14 @@ def calcolo_punti(partner, acquisto):
 
 	contratto = ContrattoMarketing.objects.get(partners = partner)
 	Pe = contratto.percentuale_marketing
+	Pe = (Pe/100)
+
 	E = acquisto.importo
 	Cp = 0.01
 
 	Mt = calcola_Mt(tribu_utente, tribu_partner)
 
 	Pp = ((E * Pe) * Mt) / Cp
-	print "Punti piuma"
-	print Pp
 	return Pp
 
 

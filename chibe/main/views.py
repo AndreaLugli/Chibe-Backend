@@ -266,7 +266,6 @@ def get_code(request):
 	username = "bella"
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
-	#codice = "Ciaone"
 	return HttpResponse(codice)
 
 def search_amico(request):
@@ -408,5 +407,41 @@ def utente_desideri(request):
 	gruppi = Gruppo.objects.filter(utenti = utente).values("punti", "desiderio__nome", "id")
 
 	return JsonResponse(list(gruppi), safe = False)
+
+def utente_punti(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+	punti = utente.punti
+
+	return HttpResponse(punti)	
+
+@csrf_exempt
+def utente_inviapunti(request):
+	#user = request.user
+	#username = user.username
+	username = "bella"
+	utente = Utente.objects.get(username = username)
+
+	amico_id = request.POST['amico_id']
+	amico = Utente.objects.get(pk = amico_id)
+
+	punti = request.POST['punti']
+	punti = int(punti)
+
+	utente_punti_old = utente.punti
+	utente_punti_new = utente_punti_old - punti
+	utente.punti = utente_punti_new
+	utente.save()
+
+	amico_punti_old = amico.punti
+	amico_punti_new = amico_punti_old + punti
+	amico.punti = amico_punti_new
+	amico.save()
+
+	return HttpResponse()
+
+
 
 

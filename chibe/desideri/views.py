@@ -4,16 +4,25 @@ from django.views.generic import View
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from datetime import datetime
 from django.shortcuts import render
 from .models import Desiderio
 from main.models import Gruppo, Utente
 
 def desideri_home(request):
+	now = datetime.now().date()
 
-	#data_inizio
-	#data_fine
-
-	desideri = Desiderio.objects.all().values("id", "nome", "descrizione_breve", "in_evidenza", "num_gruppo")
+	desideri = Desiderio.objects.filter(
+		data_inizio__lte = now, 
+		data_fine__gte = now
+	).values(
+		"id", 
+		"nome",
+		"descrizione_breve", 
+		"in_evidenza", 
+		"num_gruppo", 
+		"costo_riscatto"
+	)
 
 	return JsonResponse(list(desideri), safe = False)
 
@@ -30,7 +39,8 @@ class desideri_id(View):
 			"nome" : d.nome,
 			"descrizione_lunga" : d.descrizione_lunga,
 			"immagine" : d.immagine,
-			"num_gruppo" : d.num_gruppo
+			"num_gruppo" : d.num_gruppo,
+			"costo_riscatto" : d.costo_riscatto
 		}
 
 		return JsonResponse(desiderio_json, safe = False)

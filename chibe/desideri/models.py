@@ -25,7 +25,7 @@ class Desiderio(models.Model):
 
 	immagine = models.CharField(max_length = 300, blank = True, null = True)
 	categoria = models.ForeignKey(CategoriaDesiderio)
-	data_inizio = models.DateField
+	data_inizio = models.DateField()
 	data_fine = models.DateField()
 	in_evidenza = models.BooleanField(default = False)
 	sku = models.IntegerField()
@@ -39,6 +39,9 @@ class Desiderio(models.Model):
 
 	def __unicode__(self):
 		return self.nome
+
+	def punti_piuma(self):
+		return self.costo_riscatto / 0.01
 
 	class Meta:
 		verbose_name = "Desiderio"

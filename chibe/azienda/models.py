@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from main.models import Tribu, Utente
-from datetime import date
+from datetime import date, datetime
 from haversine import haversine
 
 class Categoria(models.Model):
@@ -27,30 +27,33 @@ class SearchQueryset(models.query.QuerySet):
 		center_point = (lat, lon)
 
 		result_list = []
-
 		dict_distanza = {}
+		now = datetime.now().date()
 
 		for su in self:
-			point = (su.latitudine, su.longitudine)
-			distanza = haversine(center_point, point)
 
-			if distanza < limite:
+			esiste_contratto = ContrattoMarketing.objects.filter(inizio__lte = now, fine__gte = now, partners = su).exists()
+			if esiste_contratto:
+				point = (su.latitudine, su.longitudine)
+				distanza = haversine(center_point, point)
 
-				json_su = {
-					"id" : su.id,
-					"foto" : str(su.foto),
-					"descrizione" : su.descrizione,
-					"telefono" : su.telefono_fisso,
-					"ragione_sociale" : su.ragione_sociale,
-					"indirizzo" : su.indirizzo,
-					"distanza" : distanza,
-					"tribu_1" : su.tribu_1,
-					"tribu_2" : su.tribu_2,
-					"tribu_3" : su.tribu_3,
-					"tribu_4" : su.tribu_4
-				}
+				if distanza < limite:
 
-				result_list.append(json_su)
+					json_su = {
+						"id" : su.id,
+						"foto" : str(su.foto),
+						"descrizione" : su.descrizione,
+						"telefono" : su.telefono_fisso,
+						"ragione_sociale" : su.ragione_sociale,
+						"indirizzo" : su.indirizzo,
+						"distanza" : distanza,
+						"tribu_1" : su.tribu_1,
+						"tribu_2" : su.tribu_2,
+						"tribu_3" : su.tribu_3,
+						"tribu_4" : su.tribu_4
+					}
+
+					result_list.append(json_su)
 
 		return result_list
 
@@ -83,8 +86,6 @@ class Partner(User):
 	tribu_2 = models.IntegerField(default=0)
 	tribu_3 = models.IntegerField(default=0)
 	tribu_4 = models.IntegerField(default=0)
-
-
 
 	def __unicode__(self):
 		return self.ragione_sociale
@@ -132,6 +133,22 @@ class Acquisto(models.Model):
 class ContrattoMarketing(models.Model):
 	partners = models.ManyToManyField(Partner)
 	percentuale_marketing = models.FloatField(default = 0)
+
+	# PERCENTUALE_LIST = (
+	# 	("5", "x1"),
+	# 	("10", "x2"),
+	# 	("15", "x3"),
+	# 	("20", "x4"),
+	# 	("25", "x5"),
+	# 	("30", "x6"),
+	# 	("35", "x7"),
+	# 	("40", "x8"),
+	# 	("45", "x9"),
+	# 	("45", "x10"),
+	# )
+
+	# percentuale_marketing = models.CharField(max_length = 2, choices = PERCENTUALE_LIST, default = "5")	
+
 	inizio = models.DateField()
 	fine = models.DateField()
 	tacito_rinnovo = models.BooleanField(default = True)
