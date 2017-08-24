@@ -165,5 +165,9 @@ def calcolo_punti(partner, acquisto):
 	return Pp
 
 
+from .tasks import salute
+def test(request):
+	salute.delay()
+	return HttpResponse("Take a photo")
 
 

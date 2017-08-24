@@ -18,9 +18,15 @@ INSTALLED_APPS = [
 	'corsheaders',
 	'azienda',
 	'main',
-	'desideri'
+	'desideri',
+	'django_celery_results',
+	'django_celery_beat'
 ]
 
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TASK_SERIALIZER = 'pickle' 
+CELERY_ACCEPT_CONTENT = ['pickle']
 
 MIDDLEWARE = [
 	'corsheaders.middleware.CorsMiddleware',
