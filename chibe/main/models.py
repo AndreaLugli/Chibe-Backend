@@ -73,6 +73,11 @@ class Gruppo(models.Model):
 		verbose_name = "Gruppo"
 		verbose_name_plural = "Gruppi"	
 
+class PuntiGruppo(models.Model):
+	utente = models.ForeignKey(Utente, related_name = "utente_puntigruppo")
+	gruppo = models.ForeignKey(Gruppo, related_name = "gruppo_puntigruppo")
+	punti = models.IntegerField(default = 0)
+
 class Rubrica(models.Model):
 	utente = models.ForeignKey(Utente, related_name = "utente_gruppo")
 	utenti = models.ManyToManyField(Utente, related_name = "utenti_gruppo")

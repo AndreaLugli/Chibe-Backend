@@ -10,7 +10,7 @@ from datetime import datetime
 from random import randint
 from .models import Utente, OnBoard, Tribu
 from .models import Provincia, Scuola
-from .models import Gruppo
+from .models import Gruppo, PuntiGruppo
 from django.conf import settings
 import StringIO
 from PIL import Image
@@ -404,9 +404,32 @@ def utente_desideri(request):
 	username = "bella"
 	utente = Utente.objects.get(username = username)
 
-	gruppi = Gruppo.objects.filter(utenti = utente).values("punti", "desiderio__nome", "id")
+	gruppi = Gruppo.objects.filter(utenti = utente)
 
-	return JsonResponse(list(gruppi), safe = False)
+	list_gruppi = []
+
+	for gruppo in gruppi:
+
+		utente_admin = gruppo.utente_admin
+		admin = False
+		if utente == utente_admin:
+			admin = True
+
+		utenti = gruppo.utenti.all().values("id")
+
+		gruppo_json = {
+			"id" : gruppo.id,
+			"punti" : gruppo.punti,
+			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"admin" : admin,
+			"utenti" : list(utenti),
+			"nome" : gruppo.desiderio.nome,
+			"num_gruppo" : gruppo.desiderio.num_gruppo
+		}
+
+		list_gruppi.append(gruppo_json)
+
+	return JsonResponse(list_gruppi, safe = False)
 
 def utente_punti(request):
 	#user = request.user
@@ -442,6 +465,126 @@ def utente_inviapunti(request):
 
 	return HttpResponse()
 
+class utente_gruppo(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_gruppo, self).dispatch(*args, **kwargs)
 
+	def get(self, request, id, *args, **kwargs):	
+		#user = request.user
+		#username = user.username
+		username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		gruppo = Gruppo.objects.get(pk = id)
+
+		list_gruppi = []
+
+		utente_admin = gruppo.utente_admin
+		admin = False
+		if utente == utente_admin:
+			admin = True
+
+		utenti = gruppo.utenti.all().values("id")
+
+		miei_punti = utente.punti
+
+		gruppo_json = {
+			"id" : gruppo.id,
+			"punti" : gruppo.punti,
+			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"admin" : admin,
+			"utenti" : list(utenti),
+			"nome" : gruppo.desiderio.nome,
+			"num_gruppo" : gruppo.desiderio.num_gruppo,
+			"miei_punti" : miei_punti
+		}
+
+		list_gruppi.append(gruppo_json)
+
+		return JsonResponse(gruppo_json, safe = False)
+
+	def post(self, request, id, *args, **kwargs):
+		#user = request.user
+		#username = user.username
+		username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		gruppo = Gruppo.objects.get(pk = id)
+
+		punti_piuma = request.POST['punti_piuma']
+		punti_piuma = int(punti_piuma)
+
+		PuntiGruppo.objects.create(gruppo = gruppo, utente = utente, punti = punti_piuma)
+
+		utente_old_punti = utente.punti
+		utente_punti_new = utente_old_punti - punti_piuma
+		utente.punti = utente_punti_new
+		utente.save()
+
+		gruppo_old_punti = gruppo.punti
+		gruppo_new_punti = gruppo_old_punti + punti_piuma
+		gruppo.punti = gruppo_new_punti
+		gruppo.save()
+
+		return HttpResponse()
+
+class utente_gruppo_utenti(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_gruppo_utenti, self).dispatch(*args, **kwargs)
+
+	def get(self, request, id, *args, **kwargs):	
+		#user = request.user
+		#username = user.username
+		username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		gruppo = Gruppo.objects.get(pk = id)
+
+		list_gruppi = []
+
+		utente_admin = gruppo.utente_admin
+		admin = False
+		if utente == utente_admin:
+			admin = True
+
+		utenti_gruppo = gruppo.utenti.all()
+		amici_miei = utente.amici.all()
+		amici_nogruppo = amici_miei.exclude(pk__in = utenti_gruppo)
+
+		utenti_gruppo = utenti_gruppo.values("id", "username", "first_name", "last_name")
+		amici_nogruppo = amici_nogruppo.values("id", "username", "first_name", "last_name")
+
+		gruppo_json = {
+			"io" : utente.id,
+			"id" : gruppo.id,
+			"punti" : gruppo.punti,
+			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"admin" : admin,
+			"utenti" : list(utenti_gruppo),
+			"amici" : list(amici_nogruppo),
+			"nome" : gruppo.desiderio.nome,
+			"num_gruppo" : gruppo.desiderio.num_gruppo
+		}
+
+		list_gruppi.append(gruppo_json)
+
+		return JsonResponse(gruppo_json, safe = False)
+
+	def post(self, request, id, *args, **kwargs):
+		#user = request.user
+		#username = user.username
+		username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		gruppo = Gruppo.objects.get(pk = id)
+
+		amico_id = request.POST['amico_id']
+		amico = Utente.objects.get(pk = amico_id)
+
+		gruppo.utenti.add(amico)
+
+		return HttpResponse()
 
 

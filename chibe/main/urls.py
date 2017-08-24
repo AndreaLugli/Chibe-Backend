@@ -14,6 +14,7 @@ from .views import utente_tribu
 from .views import utente_modifica
 from .views import utente_desideri
 from .views import utente_punti, utente_inviapunti
+from .views import utente_gruppo, utente_gruppo_utenti
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -36,7 +37,7 @@ urlpatterns = [
 	url(r'^desideri/$', utente_desideri, name = 'utente_desideri'),	
 	url(r'^punti/$', utente_punti, name = 'utente_punti'),	
 	url(r'^invia-punti/$', utente_inviapunti, name = 'utente_inviapunti'),
-
-
+	url(r'^gruppo/(?P<id>[0-9]+)/$', utente_gruppo.as_view(), name = "utente_gruppo"),	
+	url(r'^gruppo/(?P<id>[0-9]+)/utenti/$', utente_gruppo_utenti.as_view(), name = "utente_gruppo_utenti"),	
 ]
 
