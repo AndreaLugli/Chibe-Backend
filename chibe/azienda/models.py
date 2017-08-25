@@ -82,10 +82,11 @@ class Partner(User):
 	famoco_id = models.CharField(max_length = 300, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
 
-	tribu_1 = models.IntegerField(default=0)
-	tribu_2 = models.IntegerField(default=0)
-	tribu_3 = models.IntegerField(default=0)
-	tribu_4 = models.IntegerField(default=0)
+	orsi = models.IntegerField(default=0)
+	aquile = models.IntegerField(default=0)
+	lupi = models.IntegerField(default=0)
+	puma = models.IntegerField(default=0)
+	volpi = models.IntegerField(default=0)	
 
 	def __unicode__(self):
 		return self.ragione_sociale
@@ -124,7 +125,7 @@ class Acquisto(models.Model):
 	timestamp = models.DateTimeField(auto_now_add = True)
 
 	def __unicode__(self):
-		return self.importo
+		return str(self.importo)
 
 	class Meta:
 		verbose_name = "Acquisto"

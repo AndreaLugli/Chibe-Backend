@@ -134,6 +134,28 @@ class azienda_pagamento(View):
 		utente.punti = utente_punti_vecchi + pp 
 		utente.save()
 
+		tribu_utente = utente.tribu.nome
+		if tribu_utente == "volpi":
+			volpi_old = partner.volpi
+			partner.volpi = volpi_old + pp
+
+		elif tribu_utente == "puma":
+			puma_old = partner.puma
+			partner.puma = puma_old + pp	
+
+		elif tribu_utente == "lupi":
+			lupi_old = partner.lupi
+			partner.lupi = lupi_old + pp
+
+		elif tribu_utente == "aquile":
+			aquile_old = partner.aquile
+			partner.aquile = aquile_old + pp				
+		elif tribu_utente == "orsi":
+			orsi_old = partner.orsi
+			partner.orsi = orsi_old + pp	
+
+		partner.save()
+
 		return HttpResponse()
 
 
@@ -165,9 +187,9 @@ def calcolo_punti(partner, acquisto):
 	return Pp
 
 
-from .tasks import salute
+from .tasks import salute, check_tribu
 def test(request):
-	salute.delay()
+	check_tribu()
 	return HttpResponse("Take a photo")
 
 

@@ -89,6 +89,7 @@ class utente_register(View):
 
 		email = email.strip()
 		username = username.strip()
+		
 		email = email.lower()
 
 		username_ex = Utente.objects.filter(username = username).exists()
