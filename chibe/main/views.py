@@ -140,9 +140,9 @@ class utente_step1(View):
 		return super(utente_step1, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		nome = request.POST['nome']
@@ -166,9 +166,9 @@ class utente_step2(View):
 		return super(utente_step2, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		#Gestione avatar
@@ -214,9 +214,9 @@ class utente_step3(View):
 		return super(utente_step3, self).dispatch(*args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		provincia_id = request.POST['provincia_id']
@@ -262,17 +262,17 @@ def upload_picture(request):
 	return HttpResponse(output)
 
 def get_code(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
 	return HttpResponse(codice)
 
 def search_amico(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	amico = request.GET.get("amico", None)
@@ -291,9 +291,9 @@ def search_amico(request):
 	return JsonResponse(list(utenti), safe = False)
 
 def utente_amici(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	amici = utente.amici.all().values("username", "id", "first_name", "last_name")
@@ -302,9 +302,9 @@ def utente_amici(request):
 
 @csrf_exempt
 def utente_amico_add(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	id_amico = request.POST['id_amico']
@@ -316,9 +316,9 @@ def utente_amico_add(request):
 
 @csrf_exempt
 def utente_amico_delete(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	id_amico = request.POST['id_amico']
@@ -330,9 +330,9 @@ def utente_amico_delete(request):
 
 @csrf_exempt
 def utente_info(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -361,9 +361,9 @@ def utente_info(request):
 
 @csrf_exempt
 def utente_tribu(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	tribu = request.POST['tribu']
@@ -385,9 +385,9 @@ def utente_tribu(request):
 
 @csrf_exempt
 def utente_modifica(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	descrizione = request.POST['descrizione']
@@ -400,9 +400,9 @@ def utente_modifica(request):
 
 @csrf_exempt
 def utente_desideri(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	gruppi = Gruppo.objects.filter(utenti = utente)
@@ -433,9 +433,9 @@ def utente_desideri(request):
 	return JsonResponse(list_gruppi, safe = False)
 
 def utente_punti(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 	punti = utente.punti
 
@@ -443,9 +443,9 @@ def utente_punti(request):
 
 @csrf_exempt
 def utente_inviapunti(request):
-	#user = request.user
-	#username = user.username
-	username = "bella"
+	user = request.user
+	username = user.username
+	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	amico_id = request.POST['amico_id']
@@ -472,9 +472,9 @@ class utente_gruppo(View):
 		return super(utente_gruppo, self).dispatch(*args, **kwargs)
 
 	def get(self, request, id, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -506,9 +506,9 @@ class utente_gruppo(View):
 		return JsonResponse(gruppo_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -536,9 +536,9 @@ class utente_gruppo_utenti(View):
 		return super(utente_gruppo_utenti, self).dispatch(*args, **kwargs)
 
 	def get(self, request, id, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -574,9 +574,9 @@ class utente_gruppo_utenti(View):
 		return JsonResponse(gruppo_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)

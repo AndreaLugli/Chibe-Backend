@@ -46,9 +46,9 @@ class desideri_id(View):
 		return JsonResponse(desiderio_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "bella"
+		user = request.user
+		username = user.username
+		#username = "bella"
 		utente = Utente.objects.get(username = username)		
 
 		d = Desiderio.objects.get(pk = id)

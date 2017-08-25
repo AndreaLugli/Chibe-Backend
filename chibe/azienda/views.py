@@ -25,8 +25,8 @@ class azienda_login(View):
 		user = authenticate(request, username=imei, password=imei)
 
 		if user is not None:
-			username = user.username
-			#username = "868051020276493"
+			#username = user.username
+			username = "868051020276493"
 			partner = Partner.objects.get(username = username)
 
 			esistono_contratti = ContrattoMarketing.objects.filter(partners = partner).exists()
@@ -134,27 +134,29 @@ class azienda_pagamento(View):
 		utente.punti = utente_punti_vecchi + pp 
 		utente.save()
 
-		tribu_utente = utente.tribu.nome
-		if tribu_utente == "volpi":
-			volpi_old = partner.volpi
-			partner.volpi = volpi_old + pp
+		if utente.tribu:
+			tribu_utente = utente.tribu.nome
 
-		elif tribu_utente == "puma":
-			puma_old = partner.puma
-			partner.puma = puma_old + pp	
+			if tribu_utente == "volpi":
+				volpi_old = partner.volpi
+				partner.volpi = volpi_old + pp
 
-		elif tribu_utente == "lupi":
-			lupi_old = partner.lupi
-			partner.lupi = lupi_old + pp
+			elif tribu_utente == "puma":
+				puma_old = partner.puma
+				partner.puma = puma_old + pp	
 
-		elif tribu_utente == "aquile":
-			aquile_old = partner.aquile
-			partner.aquile = aquile_old + pp				
-		elif tribu_utente == "orsi":
-			orsi_old = partner.orsi
-			partner.orsi = orsi_old + pp	
+			elif tribu_utente == "lupi":
+				lupi_old = partner.lupi
+				partner.lupi = lupi_old + pp
 
-		partner.save()
+			elif tribu_utente == "aquile":
+				aquile_old = partner.aquile
+				partner.aquile = aquile_old + pp				
+			elif tribu_utente == "orsi":
+				orsi_old = partner.orsi
+				partner.orsi = orsi_old + pp	
+
+			partner.save()
 
 		return HttpResponse()
 
@@ -178,7 +180,7 @@ def calcolo_punti(partner, acquisto):
 	Pe = contratto.percentuale_marketing
 	Pe = (Pe/100)
 
-	E = acquisto.importo
+	E = float(acquisto.importo)
 	Cp = 0.01
 
 	Mt = calcola_Mt(tribu_utente, tribu_partner)
