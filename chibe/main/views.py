@@ -345,6 +345,12 @@ def utente_info(request):
 		if days >= 60:
 			modifica_tribu = True
 
+
+	tribu = utente.tribu
+	tribu_name = None
+	if tribu:
+		tribu_name = tribu.name
+
 	json_utente = {
 		"id" : utente.id,
 		"avatar" : utente.avatar,
@@ -353,7 +359,7 @@ def utente_info(request):
 		"nome" : utente.first_name,
 		"cognome" : utente.last_name,
 		"punti" : utente.punti,
-		"tribu" : utente.tribu.nome,
+		"tribu" : tribu_name,
 		"modifica_tribu" : modifica_tribu
 	}
 
