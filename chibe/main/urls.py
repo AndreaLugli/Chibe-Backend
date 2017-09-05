@@ -1,7 +1,9 @@
+from django.contrib.auth.views import logout
 from django.conf.urls import url
 
 from .views import check_connected
 from .views import utente_register, utente_login
+from .views import utente_forgot_password, utente_forgot_password_token
 from .views import utente_province, utente_province_id
 from .views import utente_step1, utente_step2, utente_step3
 from .views import upload_picture
@@ -20,6 +22,9 @@ urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
 	url(r'^upload_picture/$', upload_picture, name = 'upload_picture'),
 	url(r'^login/', utente_login.as_view(), name = "utente_login"),
+	url(r'^forgot-password/$', utente_forgot_password.as_view(), name = "utente_forgot_password"),
+	url(r'^forgot-password/(?P<token>[\w-]+)/$', utente_forgot_password_token.as_view(), name = "utente_forgot_password_token"),
+	url(r'^logout/', logout, name = "utente_logout"),
 	url(r'^register/', utente_register.as_view(), name = "utente_register"),
 	url(r'^province/$', utente_province.as_view(), name = "utente_province"),
 	url(r'^province/(?P<id>[0-9]+)/$', utente_province_id.as_view(), name = "utente_province_id"),	
@@ -39,5 +44,9 @@ urlpatterns = [
 	url(r'^invia-punti/$', utente_inviapunti, name = 'utente_inviapunti'),
 	url(r'^gruppo/(?P<id>[0-9]+)/$', utente_gruppo.as_view(), name = "utente_gruppo"),	
 	url(r'^gruppo/(?P<id>[0-9]+)/utenti/$', utente_gruppo_utenti.as_view(), name = "utente_gruppo_utenti"),	
+
+
+
+	
 ]
 

@@ -106,5 +106,15 @@ class OnBoard(models.Model):
 	def __unicode__(self):
 		return self.utente.email
 
+class ResetPassword(models.Model):
+	user = models.ForeignKey(Utente)
+	token = models.CharField(max_length = 300)
+	used = models.BooleanField(default = False)
 
+	class Meta:
+		verbose_name = "Reset password"
+		verbose_name_plural = "Reset password"
+
+	def __unicode__(self):
+		return self.user.get_full_name()
 

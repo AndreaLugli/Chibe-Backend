@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
+from chibe.email_system import email_reset_password
+from django.core.urlresolvers import reverse
 from django.views.generic import View
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
 from django.core import serializers
 from datetime import datetime
 from random import randint
-from .models import Utente, OnBoard, Tribu
+from .models import Utente, OnBoard, Tribu, ResetPassword
 from .models import Provincia, Scuola
 from .models import Gruppo, PuntiGruppo
 from django.conf import settings
@@ -77,6 +81,62 @@ class utente_login(View):
 			return HttpResponse(output)
 		else:
 			return HttpResponse('Unauthorized', status=401)
+
+class utente_forgot_password(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_forgot_password, self).dispatch(*args, **kwargs)
+
+	def post(self, request, *args, **kwargs):
+		email = request.POST.get("email", None)
+
+		user = get_object_or_404(Utente, email=email)
+		now = str(datetime.now()) + email
+		token = hashlib.sha224(now).hexdigest()
+
+		ResetPassword.objects.create(
+			user = user,
+			token = token
+		)
+
+		email_reset_password(email, token)
+
+		return HttpResponse()
+
+
+class utente_forgot_password_token(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_forgot_password_token, self).dispatch(*args, **kwargs)
+
+	def get(self, request, token, *args, **kwargs):
+
+		r = get_object_or_404(ResetPassword, token=token)
+
+		args = {
+			"r" : r
+		}
+
+		template_name = "utente_forgot_password_token.html"
+		return render(request, template_name, args)
+
+	def post(self, request, token, *args, **kwargs):
+		r = get_object_or_404(ResetPassword, token=token)
+
+		password = request.POST['password']
+
+		user = r.user
+		user.set_password(password)
+		user.save()
+
+		r.used = True
+		r.save()
+		
+		messages.success(request, "Password reimpostata con successo")
+		url = reverse('utente_forgot_password_token', kwargs = {'token': token})
+		return HttpResponseRedirect(url)
+
+
 
 class utente_register(View):
 	@method_decorator(csrf_exempt)
@@ -349,7 +409,7 @@ def utente_info(request):
 	tribu = utente.tribu
 	tribu_name = None
 	if tribu:
-		tribu_name = tribu.name
+		tribu_name = tribu.nome
 
 	json_utente = {
 		"id" : utente.id,
