@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib import admin
 
-from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo
+from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotification
 
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
@@ -27,4 +27,8 @@ class TribuAdmin(admin.ModelAdmin):
 @admin.register(Gruppo)
 class GruppoAdmin(admin.ModelAdmin):
 	list_display = ['desiderio', 'utente_admin', 'punti']
+
+@admin.register(PushNotification)
+class PushNotificationAdmin(admin.ModelAdmin):
+	list_display = ['utente', 'sistema_operativo', 'token']
 

@@ -654,4 +654,24 @@ class utente_gruppo_utenti(View):
 
 		return HttpResponse()
 
+class utente_register_push(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_register_push, self).dispatch(*args, **kwargs)
 
+	def post(self, request, *args, **kwargs):
+		user = request.user
+		username = user.username
+		#username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		sistema_operativo = request.POST['sistema_operativo']
+		token = request.POST['token']
+
+		PushNotification.objects.create(
+			utente = utente,
+			sistema_operativo = sistema_operativo,
+			token = token
+		)
+
+		return HttpResponse("")

@@ -25,8 +25,8 @@ class azienda_login(View):
 		user = authenticate(request, username=imei, password=imei)
 
 		if user is not None:
-			#username = user.username
-			username = "868051020276493"
+			username = user.username
+			#username = "868051020276493"
 			partner = Partner.objects.get(username = username)
 
 			esistono_contratti = ContrattoMarketing.objects.filter(partners = partner).exists()

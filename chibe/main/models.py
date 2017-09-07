@@ -118,3 +118,22 @@ class ResetPassword(models.Model):
 	def __unicode__(self):
 		return self.user.get_full_name()
 
+class PushNotification(models.Model):
+	SISTEMI = (
+		('Android', 'Android'),
+		('iOS', 'iOS'),
+		('WP', 'Windows Phone'),
+	)
+	utente = models.ForeignKey(Utente)
+	sistema_operativo = models.CharField(max_length=7, choices=SISTEMI)
+	token = models.CharField(max_length=300)
+
+	class Meta:
+		verbose_name = "Notifica push"
+		verbose_name_plural = "Notifiche push"
+
+
+
+
+
+

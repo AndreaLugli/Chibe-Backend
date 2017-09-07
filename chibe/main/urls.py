@@ -17,6 +17,7 @@ from .views import utente_modifica
 from .views import utente_desideri
 from .views import utente_punti, utente_inviapunti
 from .views import utente_gruppo, utente_gruppo_utenti
+from .views import utente_register_push
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -45,8 +46,6 @@ urlpatterns = [
 	url(r'^gruppo/(?P<id>[0-9]+)/$', utente_gruppo.as_view(), name = "utente_gruppo"),	
 	url(r'^gruppo/(?P<id>[0-9]+)/utenti/$', utente_gruppo_utenti.as_view(), name = "utente_gruppo_utenti"),	
 
-
-
-	
+	url(r'^register-push/', utente_register_push.as_view(), name = "utente_register_push"),
 ]
 
