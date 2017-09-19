@@ -6,6 +6,7 @@ from .views import utente_register, utente_login
 from .views import utente_forgot_password, utente_forgot_password_token
 from .views import utente_province, utente_province_id
 from .views import utente_step1, utente_step2, utente_step3
+from .views import utente_step1_fb
 from .views import upload_picture
 from .views import get_code
 from .views import search_amico
@@ -18,6 +19,7 @@ from .views import utente_desideri
 from .views import utente_punti, utente_inviapunti
 from .views import utente_gruppo, utente_gruppo_utenti
 from .views import utente_register_push
+from .views import register_by_access_token
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -32,6 +34,8 @@ urlpatterns = [
 	url(r'^step1/', utente_step1.as_view(), name = "utente_step1"),
 	url(r'^step2/', utente_step2.as_view(), name = "utente_step2"),	
 	url(r'^step3/', utente_step3.as_view(), name = "utente_step3"),	
+	url(r'^step1_fb/', utente_step1_fb.as_view(), name = "utente_step1_fb"),
+
 	url(r'^get_code/$', get_code, name = 'get_code'),	
 	url(r'^search_amico/$', search_amico, name = 'search_amico'),	
 	url(r'^amici/$', utente_amici, name = 'amici'),	
@@ -47,5 +51,7 @@ urlpatterns = [
 	url(r'^gruppo/(?P<id>[0-9]+)/utenti/$', utente_gruppo_utenti.as_view(), name = "utente_gruppo_utenti"),	
 
 	url(r'^register-push/', utente_register_push.as_view(), name = "utente_register_push"),
+
+	url(r'^register-by-token/(?P<backend>[^/]+)/$', register_by_access_token, name = 'register_by_access_token'),
 ]
 

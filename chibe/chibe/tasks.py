@@ -15,10 +15,10 @@ def send_email_task(subject, message, FROM, to):
 
 @shared_task
 def send_push_gcm(token, content):
-	google_api_key = ""
+	google_api_key = "AAAAgGY9xAc:APA91bFwKXq9w7sB6EKzNGvIKInrc8VF8TRu3SInUM1zbisRmSX9gnlMcWFam4uIMoeAv0CGhNlwrEHvEI7htSbg6-2YHQ2hIgD0agKF95GZ_tEduz4pTDSJiQj2tpZ10hGPPLapIEvm"
 
 	gcm = GCM(google_api_key)
-	data = {'message': content, 'title' : 'EDGE'}
+	data = {'message': content, 'title' : 'Chibe'}
 
 	gcm.plaintext_request(registration_id=token, data=data)
 

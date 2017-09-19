@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core import serializers
 
-from .models import Partner, Categoria, Acquisto, ContrattoMarketing
+from azienda.models import Partner, Categoria, Acquisto, ContrattoMarketing
 from main.models import Tribu, Utente
 
 def azienda_index(request):
@@ -38,11 +38,11 @@ class azienda_login(View):
 					login(request, user)
 					return HttpResponse()
 				else:
-					return HttpResponse('Unauthorized', status=401)
+					return HttpResponse('Unauthorized - 1', status=401)
 			else:
-				return HttpResponse('Unauthorized', status=401)
+				return HttpResponse('Unauthorized - 2', status=401)
 		else:
-			return HttpResponse('Unauthorized', status=401)
+			return HttpResponse('Unauthorized - 3', status=401)
 
 class azienda_categorie(View):
 	def dispatch(self, *args, **kwargs):
@@ -191,7 +191,7 @@ def calcolo_punti(partner, acquisto):
 
 from .tasks import salute, check_tribu
 def test(request):
-	check_tribu()
-	return HttpResponse("Take a photo")
+	#check_tribu()
+	return HttpResponse("Successo!!!")
 
 

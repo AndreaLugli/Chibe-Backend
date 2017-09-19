@@ -10,7 +10,7 @@ class UtenteAdmin(admin.ModelAdmin):
 
 @admin.register(OnBoard)
 class OnBoardAdmin(admin.ModelAdmin):
-	list_display = ['utente', 'step_1', 'step_2', 'step_3', 'complete']
+	list_display = ['utente', 'step_1', 'step_2', 'step_3', 'complete', 'fb_step_1', 'fb_step_2', 'fb_complete']
 
 @admin.register(Provincia)
 class ProvinciaAdmin(admin.ModelAdmin):

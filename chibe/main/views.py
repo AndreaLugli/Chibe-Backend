@@ -15,36 +15,62 @@ from random import randint
 from .models import Utente, OnBoard, Tribu, ResetPassword
 from .models import Provincia, Scuola
 from .models import Gruppo, PuntiGruppo
+from .models import PushNotification
+from social_django.models import UserSocialAuth
 from django.conf import settings
 import StringIO
 from PIL import Image
 from django.db.models import Q
 import hashlib
+import wget
 
 AVATAR_MEDIA_ROOT = settings.MEDIA_ROOT + "/avatar"
 
 def check_connected(request):
 	if request.user.is_authenticated():
-		
+
 		username = request.user.username
 		utente = Utente.objects.get(username = username)
 		onboard = OnBoard.objects.get(utente = utente)
 
-		complete = onboard.complete
-		step_1 = onboard.step_1
-		step_2 = onboard.step_2
-		step_3 = onboard.step_3
+		is_social = UserSocialAuth.objects.filter(user_id = request.user.id).exists()
 
-		if complete:
-			output = 0
-		elif not step_1:
-			output = 1
-		elif not step_2:
-			output = 2
-		elif not step_3:
-			output = 3
+		if is_social:
+			tipo_utente = "social"
 
-		return HttpResponse(output)
+			complete = onboard.fb_complete
+			fb_step_1 = onboard.fb_step_1
+			fb_step_2 = onboard.fb_step_2
+
+			if complete:
+				output = 0
+			elif not fb_step_1:
+				output = 1
+			elif not fb_step_2:
+				output = 2
+		else:
+			tipo_utente = "regular"
+
+			complete = onboard.complete
+			step_1 = onboard.step_1
+			step_2 = onboard.step_2
+			step_3 = onboard.step_3
+
+			if complete:
+				output = 0
+			elif not step_1:
+				output = 1
+			elif not step_2:
+				output = 2
+			elif not step_3:
+				output = 3
+
+		json_output = {
+			"tipo": tipo_utente,
+			"output": output
+		}
+
+		return JsonResponse(json_output)
 	else:
 		return HttpResponse('Unauthorized', status=401)
 
@@ -78,7 +104,12 @@ class utente_login(View):
 			elif not step_3:
 				output = 3
 
-			return HttpResponse(output)
+			json_output = {
+				"tipo": "regular",
+				"output": output
+			}
+
+			return JsonResponse(json_output)
 		else:
 			return HttpResponse('Unauthorized', status=401)
 
@@ -220,6 +251,28 @@ class utente_step1(View):
 
 		return HttpResponse()
 
+class utente_step1_fb(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_step1_fb, self).dispatch(*args, **kwargs)
+
+	def post(self, request, *args, **kwargs):
+		user = request.user
+		username = user.username
+		#username = "bella"
+		utente = Utente.objects.get(username = username)
+
+		cellulare = request.POST['cellulare']
+
+		utente.telefono_cellulare = cellulare
+		utente.save()
+
+		onboard_obj = OnBoard.objects.get(utente = utente)
+		onboard_obj.fb_step_1 = True
+		onboard_obj.save()
+
+		return HttpResponse()
+
 class utente_step2(View):
 	@method_decorator(csrf_exempt)
 	def dispatch(self, *args, **kwargs):
@@ -295,6 +348,8 @@ class utente_step3(View):
 
 		onboard_obj = OnBoard.objects.get(utente = utente)
 		onboard_obj.step_3 = True
+		onboard_obj.fb_step_2 = True
+		onboard_obj.fb_complete = True
 		onboard_obj.complete = True
 		onboard_obj.save()
 
@@ -662,7 +717,7 @@ class utente_register_push(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
+		#username = "piero"
 		utente = Utente.objects.get(username = username)
 
 		sistema_operativo = request.POST['sistema_operativo']
@@ -675,3 +730,90 @@ class utente_register_push(View):
 		)
 
 		return HttpResponse("")
+
+
+from django.contrib.auth import login
+from social_django.utils import psa
+
+@psa('social:complete')
+def register_by_access_token(request, backend):
+	token = request.GET.get('access_token')
+	user = request.backend.do_auth(token, ajax = True)
+
+	if user:
+		login(request, user)
+
+		username = request.user.username
+		utente = Utente.objects.get(username = username)
+		onboard = OnBoard.objects.get(utente = utente)
+
+		tipo_utente = "social"
+
+		complete = onboard.fb_complete
+		fb_step_1 = onboard.fb_step_1
+		fb_step_2 = onboard.fb_step_2
+
+		if complete:
+			output = 0
+		elif not fb_step_1:
+			output = 1
+		elif not fb_step_2:
+			output = 2
+
+		json_output = {
+			"tipo": tipo_utente,
+			"output": output
+		}
+
+		return JsonResponse(json_output)
+
+def register_social(backend, user, response, strategy, *args, **kwargs):
+	backend_name = backend.name
+	if backend_name == "google-oauth2":
+		email = response['emails'][0]['value']
+		name_obj = response['name']
+		first_name = name_obj['givenName']
+		last_name = name_obj['familyName']
+
+		url_ = response['image']['url']
+		url_avatar = url_avatar.split("?sz=")[0]
+
+	elif backend_name == "facebook":
+		url_avatar = "http://graph.facebook.com/%s/picture?type=large"%response['id']
+		first_name = response['first_name']
+		last_name = response['last_name']
+		#email = response['email']
+		email = response.get("email", None)
+
+	now = datetime.now()
+	now_formatted = now.strftime("%Y-%m-%d_%H-%M")
+	token = hashlib.sha224(now_formatted).hexdigest()	
+	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
+
+	wget.download(url_avatar, out=outfile)
+	output = "/media/avatar/" + token + '.jpg'
+
+	if email:
+		user.email = email
+		
+	user.first_name = first_name
+	user.last_name = last_name
+	user.save()		
+
+	member_exists = Utente.objects.filter(user_ptr = user).exists()
+
+	if member_exists:
+		member = Utente.objects.get(user_ptr = user)
+	else:
+		member = Utente(user_ptr = user)
+		codice = generate_code()
+		member.codice = codice
+		member.save()
+
+		OnBoard.objects.create(utente = member)
+
+	member.avatar = output
+
+	member.__dict__.update(user.__dict__)
+	member.save()
+

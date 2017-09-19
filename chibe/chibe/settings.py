@@ -20,8 +20,44 @@ INSTALLED_APPS = [
 	'main',
 	'desideri',
 	'django_celery_results',
-	'django_celery_beat'
+	'django_celery_beat',
+	'social_django'
 ]
+
+AUTHENTICATION_BACKENDS = [
+	'social_core.backends.google.GoogleOAuth2',
+	'social_core.backends.facebook.FacebookOAuth2',
+	'django.contrib.auth.backends.ModelBackend',
+]
+
+SOCIAL_AUTH_FACEBOOK_KEY = '1610936385616742'
+SOCIAL_AUTH_FACEBOOK_SECRET = 'b91d4828bab3e99a4c6f2cf1b08b0c80'
+
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+  'locale': 'it_IT',
+  'fields': 'id, name, email, first_name, last_name'
+}
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '218120878128-ti6b3f4et4rrfildlhl7u189kuv5il8m.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'j9ZHxcvhXhdFyEmuFz-iJhCq'
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'main.views.register_social',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+FIELDS_STORED_IN_SESSION = ['token']
 
 
 CELERY_RESULT_BACKEND = 'django-db'
@@ -48,6 +84,9 @@ TEMPLATES = [
 		'APP_DIRS': True,
 		'OPTIONS': {
 			'context_processors': [
+			    'social_django.context_processors.backends',
+			    'social_django.context_processors.login_redirect',
+
 				'django.template.context_processors.debug',
 				'django.template.context_processors.request',
 				'django.contrib.auth.context_processors.auth',

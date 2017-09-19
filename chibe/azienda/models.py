@@ -39,6 +39,16 @@ class SearchQueryset(models.query.QuerySet):
 
 				if distanza < limite:
 
+					orsi = su.orsi
+					aquile = su.aquile
+					lupi = su.lupi
+					puma = su.puma
+					volpi = su.volpi
+					tribu = su.tribu
+					tribu_val = None
+					if tribu:
+						tribu_val = tribu.nome
+
 					json_su = {
 						"id" : su.id,
 						"foto" : str(su.foto),
@@ -47,10 +57,12 @@ class SearchQueryset(models.query.QuerySet):
 						"ragione_sociale" : su.ragione_sociale,
 						"indirizzo" : su.indirizzo,
 						"distanza" : distanza,
-						"tribu_1" : su.tribu_1,
-						"tribu_2" : su.tribu_2,
-						"tribu_3" : su.tribu_3,
-						"tribu_4" : su.tribu_4
+						"orsi" : orsi,
+						"aquile" : aquile,
+						"lupi" : lupi,
+						"puma" : puma,
+						"volpi" : volpi,
+						"tribu" : tribu_val
 					}
 
 					result_list.append(json_su)

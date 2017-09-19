@@ -103,6 +103,10 @@ class OnBoard(models.Model):
 	step_2 = models.BooleanField(default = False, verbose_name = "Avatar")
 	step_3 = models.BooleanField(default = False, verbose_name = "Provincia")
 
+	fb_step_1 = models.BooleanField(default = False, verbose_name = "Dati extra Facebook")
+	fb_step_2 = models.BooleanField(default = False, verbose_name = "Provincia")
+	fb_complete = models.BooleanField(default = False)
+
 	def __unicode__(self):
 		return self.utente.email
 
