@@ -25,7 +25,8 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-	'social_core.backends.google.GooglePlusAuth',
+	#'social_core.backends.google.GooglePlusAuth',
+	'main.views.CustomGooglePlusAuth',
 	'social_core.backends.facebook.FacebookOAuth2',
 	'django.contrib.auth.backends.ModelBackend',
 ]
@@ -40,8 +41,8 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
   'fields': 'id, name, email, first_name, last_name'
 }
 
-SOCIAL_AUTH_GOOGLE_PLUS_KEY = '...'
-SOCIAL_AUTH_GOOGLE_PLUS_SECRET = '...'
+SOCIAL_AUTH_GOOGLE_PLUS_KEY = '700637450112-on9jl395jvl3ann7oioj1ab488imob8h.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_PLUS_SECRET = 'eXh6xNiY3_IbklplkiAhQBRq'
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',

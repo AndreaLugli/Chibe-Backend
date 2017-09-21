@@ -734,6 +734,31 @@ class utente_register_push(View):
 
 from django.contrib.auth import login
 from social_django.utils import psa
+from social_core.backends.google import GooglePlusAuth
+from social_core.utils import handle_http_errors
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
+CLIENT_ID = settings.SOCIAL_AUTH_GOOGLE_PLUS_KEY
+
+class CustomGooglePlusAuth(GooglePlusAuth):
+	def user_data(self, access_token, *args, **kwargs):
+		idinfo = id_token.verify_oauth2_token(access_token, requests.Request(), CLIENT_ID)
+		if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+			raise ValueError('Wrong issuer.')
+		return idinfo
+
+
+	@handle_http_errors
+	def do_auth(self, access_token, *args, **kwargs):
+		"""Finish the auth process once the access_token was retrieved"""
+		data = self.user_data(access_token, *args, **kwargs)
+		response = kwargs.get('response') or {}
+		response.update(data or {})
+		if 'access_token' not in response:
+			response['access_token'] = access_token
+		kwargs.update({'response': response, 'backend': self})
+		return self.strategy.authenticate(*args, **kwargs)
 
 @psa('social:complete')
 def register_by_access_token(request, backend):
@@ -769,14 +794,12 @@ def register_by_access_token(request, backend):
 
 def register_social(backend, user, response, strategy, *args, **kwargs):
 	backend_name = backend.name
-	if backend_name == "google-oauth2":
-		email = response['emails'][0]['value']
-		name_obj = response['name']
-		first_name = name_obj['givenName']
-		last_name = name_obj['familyName']
+	if backend_name == "google-plus":
+		email = response['email']
+		first_name = response['given_name']
+		last_name = response['family_name']
 
-		url_ = response['image']['url']
-		url_avatar = url_avatar.split("?sz=")[0]
+		url_avatar = response['picture']
 
 	elif backend_name == "facebook":
 		url_avatar = "http://graph.facebook.com/%s/picture?type=large"%response['id']
