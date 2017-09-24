@@ -6,7 +6,7 @@ from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotif
 
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
-	list_display = ['username', 'tribu', 'punti', 'avatar', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe']
+	list_display = ['username', 'tribu', 'punti', 'avatar', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe', 'invite_link']
 
 @admin.register(OnBoard)
 class OnBoardAdmin(admin.ModelAdmin):

@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				{% if success %}
+					Grazie per esserti registrato, hai già guadagnato {{punti}} punti<br>
+					Scarica l'app per completare il profilo e usare chibe
+				{% else %}
+					{% for message in messages %}
+						<div class="alert {{ message.tags }} alert-dismissible" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+							{{ message }}
+						</div>
+					{% endfor %}
+
+					<h1>{{utente}} ti ha invitato a registrarti a Chibe!</h1>
+					Completa il form per registrarti e guadagnare punti
+
+					<form method="POST">
+						{% csrf_token %}
+						<div class="form-group">
+							<label>Email</label>
+							<input type="email" class="form-control" name="email" required="">
+						</div>
+						<div class="form-group">
+							<label>Password</label>
+							<input type="password" class="form-control" name="password_1" required="">
+						</div>
+						<div class="form-group">
+							<label>Conferma la password</label>
+							<input type="password" class="form-control" name="password_2" required="">
+						</div>
+						<div class="form-group">
+							<label>Username</label>
+							<input type="text" class="form-control" name="username" required=""> 
+						</div>
+						<button type="submit" class="btn btn-primary">Registrarti</button>			
+					</form>
+				{% endif %}
+			</div>
+		</div>
+	</div>	
+
+	<script type="text/javascript" src="{% static 'bootstrap/jquery-3.2.1.slim.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap/popper.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+</body>
+</html>

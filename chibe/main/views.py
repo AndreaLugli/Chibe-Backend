@@ -840,3 +840,80 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 	member.__dict__.update(user.__dict__)
 	member.save()
 
+
+class utente_invito(View):
+	def dispatch(self, *args, **kwargs):
+		return super(utente_invito, self).dispatch(*args, **kwargs)
+
+	def get(self, request, token, *args, **kwargs):
+		utente = get_object_or_404(Utente, codice=token)
+
+		args = {
+			"utente" : utente
+		}
+
+		template_name = "utente_invito.html"
+		return render(request, template_name, args)
+
+	def post(self, request, token, *args, **kwargs):
+		utente = get_object_or_404(Utente, codice=token)
+
+		username = request.POST.get("username", None)
+		email = request.POST.get("email", None)
+
+		email = email.strip()
+		username = username.strip()
+		
+		email = email.lower()
+
+		username_ex = Utente.objects.filter(username = username).exists()
+		if username_ex:
+			messages.error(request, "Username già in uso")
+			url = reverse('utente_invito', kwargs = {'token': token})
+			return HttpResponseRedirect(url)
+
+		email_ex = Utente.objects.filter(email = email).exists()
+		if email_ex:
+			messages.error(request, "Email già in uso")
+			url = reverse('utente_invito', kwargs = {'token': token})
+			return HttpResponseRedirect(url)
+
+		password_1 = request.POST.get("password_1", None)
+		password_2 = request.POST.get("password_2", None)
+
+		if password_1 != password_2:
+			messages.error(request, "Le due password non coincidono")
+			url = reverse('utente_invito', kwargs = {'token': token})
+			return HttpResponseRedirect(url)
+
+		codice = generate_code()
+
+		utente_obj = Utente.objects.create_user(
+			username = username,
+			email = email,
+			password = password_1,
+			codice = codice
+		)
+
+		OnBoard.objects.create(utente = utente_obj)
+
+		#Punti al nuovo		
+		pp_nuovo = 10
+		utente_obj_punti_vecchi = utente_obj.punti
+		utente_obj.punti = utente_obj_punti_vecchi + pp_nuovo 
+		utente_obj.save()
+
+		#Punti al vecchio
+		pp_vecchio = 10
+		utente_punti_vecchi = utente.punti
+		utente.punti = utente_punti_vecchi + pp_vecchio
+		utente.save()
+
+		args = {
+			"success" : True,
+			"punti" : pp_nuovo
+		}
+
+		template_name = "utente_invito.html"
+		return render(request, template_name, args)
+

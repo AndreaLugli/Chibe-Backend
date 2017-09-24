@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.utils.safestring import mark_safe
 from django.db import models
 from django.contrib.auth.models import User
 from desideri.models import Desiderio
@@ -56,8 +58,11 @@ class Utente(User):
 
 	amici = models.ManyToManyField("self", blank = True)
 
-	#Login con Facebook (token)
-	#Login con Google Account (token)
+	def invite_link(self):
+		invite_link_url = reverse('utente_invito', kwargs = {'token': self.codice})
+		invite_link_str = '<a href="%s" target="_blank">%s</a>' % (invite_link_url, invite_link_url)
+		return mark_safe(invite_link_str)
+	invite_link.short_description = 'Invite link'
 
 	class Meta:
 		verbose_name = "Utente"
