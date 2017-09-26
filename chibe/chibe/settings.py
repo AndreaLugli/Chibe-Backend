@@ -21,11 +21,12 @@ INSTALLED_APPS = [
 	'desideri',
 	'django_celery_results',
 	'django_celery_beat',
-	'social_django'
+	'social_django',
+	#'push_notifications'
 ]
 
+
 AUTHENTICATION_BACKENDS = [
-	#'social_core.backends.google.GooglePlusAuth',
 	'main.views.CustomGooglePlusAuth',
 	'social_core.backends.facebook.FacebookOAuth2',
 	'django.contrib.auth.backends.ModelBackend',
@@ -147,6 +148,6 @@ MESSAGE_TAGS = {
 if (local_name == "Riccardos-MacBook-Pro.local") or (local_name == "Riccardos-MBP") or (local_name == "Riccardos-MBP.lan") or (local_name == "Riccardos-MBP.station"):
 	from settings_locale import *
 else:
-	from settings_dev import *
+	from settings_production import *
 
 

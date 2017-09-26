@@ -11,8 +11,8 @@ def push_generic(member, content):
 def send_push(member, content):
 	all_push = PushNotification.objects.filter(utente = member) 
 	for push in all_push:
-		o_system = push.o_system
-		token = push.access_token
+		o_system = push.sistema_operativo
+		token = push.token
 
 		if o_system == "Android":
 			if IS_LOCAL:

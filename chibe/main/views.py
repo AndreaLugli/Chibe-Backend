@@ -408,7 +408,7 @@ def search_amico(request):
 def utente_amici(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
+	#username = "senblet"
 	utente = Utente.objects.get(username = username)
 
 	amici = utente.amici.all().values("username", "id", "first_name", "last_name")
@@ -916,4 +916,13 @@ class utente_invito(View):
 
 		template_name = "utente_invito.html"
 		return render(request, template_name, args)
+
+def utente_invitecode(request):
+	user = request.user
+	username = user.username
+	#username = "senblet"
+	utente = Utente.objects.get(username = username)
+	codice = utente.codice
+	return HttpResponse(codice)
+
 

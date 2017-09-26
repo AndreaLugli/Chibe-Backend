@@ -2,10 +2,15 @@
 from __future__ import absolute_import, unicode_literals
 from django.core.mail import EmailMessage
 from celery import shared_task
-
-from apns import APNs, Payload
+from django.conf import settings
 from gcm import GCM
-PATH_CERT = "settings.PATH_CERT"
+from gobiko.apns import APNsClient
+
+PATH_CERT = settings.PATH_CERT
+APNS_AUTH_KEY = PATH_CERT
+APNS_KEY_ID = '4L273B4DB4'
+TEAM_ID = 'SLD359N53R'
+BUNDLE_ID = "it.socialcities.chibeb2c"
 
 @shared_task
 def send_email_task(subject, message, FROM, to):
@@ -23,13 +28,27 @@ def send_push_gcm(token, content):
 	gcm.plaintext_request(registration_id=token, data=data)
 
 @shared_task
-def send_push_apns(token, content, IS_LOCAL):
-	if IS_LOCAL:
-		use_sandbox = True		
-	else:
-		use_sandbox = False
+def send_push_apns(token_hex, content, IS_LOCAL):
+	client = APNsClient(
+		team_id=TEAM_ID,
+		bundle_id=BUNDLE_ID,
+		auth_key_id=APNS_KEY_ID,
+		auth_key_filepath=APNS_AUTH_KEY,
+		use_sandbox=IS_LOCAL,
+		force_proto='h2'
+	)
+	client.send_message(
+		token_hex, 
+		content,
+		sound = "default"
+	)
 
-	apns = APNs(use_sandbox=use_sandbox, cert_file=PATH_CERT, key_file=PATH_CERT)
-	payload = Payload(alert = content, sound="default", badge = 1)
-	
-	apns.gateway_server.send_notification(token, payload)
+
+
+
+
+
+
+
+
+

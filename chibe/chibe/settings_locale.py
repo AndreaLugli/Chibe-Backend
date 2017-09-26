@@ -16,6 +16,8 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_ROOT = "/Users/riccardo/Desktop/chibe/chibe/media" 
+PATH_CERT = '/Users/riccardo/Desktop/chibe/chibe/certs/AuthKey_4L273B4DB4.p8' #DEV
+
 
 LOGGING = {
 	'version': 1,

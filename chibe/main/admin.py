@@ -3,6 +3,18 @@ from __future__ import unicode_literals
 from django.contrib import admin
 
 from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotification
+from chibe.tasks import send_push_gcm, send_push_apns
+
+def test_push(modeladmin, request, queryset):
+	content = "Test"
+	for push in queryset:
+		o_system = push.sistema_operativo
+		token = push.token
+
+		if o_system == "Android":
+			send_push_gcm(token, content)
+		else:
+			send_push_apns(token, content, True)
 
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
@@ -31,4 +43,6 @@ class GruppoAdmin(admin.ModelAdmin):
 @admin.register(PushNotification)
 class PushNotificationAdmin(admin.ModelAdmin):
 	list_display = ['utente', 'sistema_operativo', 'token']
+	actions = [test_push]
+
 
