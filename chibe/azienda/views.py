@@ -185,7 +185,7 @@ def calcolo_punti(partner, acquisto):
 	Pe = (Pe/100)
 
 	E = float(acquisto.importo)
-	Cp = 0.01
+	Cp = 0.001
 
 	Mt = calcola_Mt(tribu_utente, tribu_partner)
 

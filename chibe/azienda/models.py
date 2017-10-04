@@ -148,21 +148,6 @@ class ContrattoMarketing(models.Model):
 	partners = models.ManyToManyField(Partner)
 	percentuale_marketing = models.FloatField(default = 0)
 
-	# PERCENTUALE_LIST = (
-	# 	("5", "x1"),
-	# 	("10", "x2"),
-	# 	("15", "x3"),
-	# 	("20", "x4"),
-	# 	("25", "x5"),
-	# 	("30", "x6"),
-	# 	("35", "x7"),
-	# 	("40", "x8"),
-	# 	("45", "x9"),
-	# 	("45", "x10"),
-	# )
-
-	# percentuale_marketing = models.CharField(max_length = 2, choices = PERCENTUALE_LIST, default = "5")	
-
 	inizio = models.DateField()
 	fine = models.DateField()
 	tacito_rinnovo = models.BooleanField(default = True)
