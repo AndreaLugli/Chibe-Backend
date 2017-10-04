@@ -89,6 +89,7 @@ class Partner(User):
 	descrizione = models.TextField(blank = True, null = True)
 	categorie = models.ManyToManyField(Categoria)
 	foto = models.ImageField(blank = True, null = True)
+	attivo = models.BooleanField(default = True) 
 
 	is_fornitore = models.BooleanField(default = False)
 	famoco_id = models.CharField(max_length = 300, blank = True, null = True)

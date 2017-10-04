@@ -29,18 +29,22 @@ class azienda_login(View):
 			#username = "868051020276493"
 			partner = Partner.objects.get(username = username)
 
-			esistono_contratti = ContrattoMarketing.objects.filter(partners = partner).exists()
-			if esistono_contratti:
+			attivo = partner.attivo
+			if attivo:
+				esistono_contratti = ContrattoMarketing.objects.filter(partners = partner).exists()
+				if esistono_contratti:
 
-				contratto = ContrattoMarketing.objects.get(partners = partner)
-				is_valid_contract = contratto.is_valid()
-				if is_valid_contract:
-					login(request, user)
-					return HttpResponse()
+					contratto = ContrattoMarketing.objects.get(partners = partner)
+					is_valid_contract = contratto.is_valid()
+					if is_valid_contract:
+						login(request, user)
+						return HttpResponse()
+					else:
+						return HttpResponse('Unauthorized - 1', status=401)
 				else:
-					return HttpResponse('Unauthorized - 1', status=401)
+					return HttpResponse('Unauthorized - 2', status=401)
 			else:
-				return HttpResponse('Unauthorized - 2', status=401)
+				return HttpResponse('Unauthorized - 4', status=401)
 		else:
 			return HttpResponse('Unauthorized - 3', status=401)
 
@@ -49,9 +53,9 @@ class azienda_categorie(View):
 		return super(azienda_categorie, self).dispatch(*args, **kwargs)
 
 	def get(self, request, *args, **kwargs):	
-		user = request.user
-		username = user.username
-		#username = "868051020276493"
+		#user = request.user
+		#username = user.username
+		username = "868051020276493"
 		partner = Partner.objects.get(username = username)
 		
 		categorie = partner.categorie.all()

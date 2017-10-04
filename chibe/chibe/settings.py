@@ -22,7 +22,7 @@ INSTALLED_APPS = [
 	'django_celery_results',
 	'django_celery_beat',
 	'social_django',
-	#'push_notifications'
+	'staff'
 ]
 
 
