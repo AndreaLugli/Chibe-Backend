@@ -19,19 +19,23 @@ class staff_index(View):
 
 	def post(self, request, *args, **kwargs):
 
-		email = request.POST.get("email", "")
+		piva = request.POST.get("piva", "")
 		codice = request.POST.get("codice", "")
 
-		p_ex = Partner.objects.filter(email = email).exists()
+		if codice == "ciao":
+			p_ex = Partner.objects.filter(partita_iva = piva).exists()
 
-		if p_ex:
-			partner = Partner.objects.get(email = email)
-			partner.attivo = False
-			partner.save()
+			if p_ex:
+				partner = Partner.objects.get(partita_iva = piva)
+				partner.attivo = False
+				partner.save()
 
-			messages.success(request, "Partner bloccato con successo")
+				messages.success(request, "Partner bloccato con successo")
+			else:
+				messages.error(request, "Il partner non esiste")
 		else:
-			messages.error(request, "Il partner non esiste")
-		
+			messages.error(request, "Codice errato")
+			
 		url = reverse('staff_index')
 		return HttpResponseRedirect(url)
+

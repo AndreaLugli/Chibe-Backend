@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from chibe.tasks import send_push_gcm, send_push_apns
 from main.models import PushNotification
 from django.conf import settings
 
-IS_LOCAL = settings.IS_DEBUG
+IS_LOCAL = settings.DEBUG
 
 def push_generic(member, content):
 	send_push(member, content)
@@ -24,3 +25,11 @@ def send_push(member, content):
 				send_push_apns(token, content, IS_LOCAL)
 			else:
 				send_push_apns.delay(token, content, IS_LOCAL)
+
+def notifica_pagamento(member, pp, ragione_sociale):
+	content = "Hai ottenuto %s punti da %s!" % (pp, ragione_sociale)
+	push_generic(member, content)
+
+def notifica_amico(member, punti):
+	content = "Un amico che hai invitato si è iscritto! Hai vinto %s punti" % (punti, )
+	push_generic(member, content)

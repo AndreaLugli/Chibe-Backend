@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core import serializers
+from chibe.push import notifica_pagamento
 
 from azienda.models import Partner, Categoria, Acquisto, ContrattoMarketing
 from main.models import Tribu, Utente
@@ -77,6 +78,73 @@ class azienda_search(View):
 
 		return JsonResponse(partners, safe = False)
 
+
+def get_percentuale(percentuale_marketing):
+	if percentuale_marketing <= 6.0:
+		percentuale = 1
+	elif (percentuale_marketing > 6.0) and (percentuale_marketing < 12.0):
+		percentuale = "1+"
+	elif percentuale_marketing == 12.0:
+		percentuale = 2
+	elif (percentuale_marketing > 12.0) and (percentuale_marketing < 18.0):
+		percentuale = "2+"
+	elif percentuale_marketing == 18.0:
+		percentuale = 3	
+	elif (percentuale_marketing > 18.0) and (percentuale_marketing < 24.0):
+		percentuale = "3+"
+	elif percentuale_marketing == 24.0:
+		percentuale = 4	
+	elif (percentuale_marketing > 24.0) and (percentuale_marketing < 30.0):
+		percentuale = "4+"
+	elif percentuale_marketing == 30.0:
+		percentuale = 5	
+	elif (percentuale_marketing > 30.0) and (percentuale_marketing < 36.0):
+		percentuale = "5+"
+	elif percentuale_marketing == 36.0:
+		percentuale = 6	
+	elif (percentuale_marketing > 36.0) and (percentuale_marketing < 42.0):
+		percentuale = "6+"
+	elif percentuale_marketing == 42.0:
+		percentuale = 7	
+	elif (percentuale_marketing > 42.0) and (percentuale_marketing < 48.0):
+		percentuale = "7+"
+	elif percentuale_marketing == 48.0:
+		percentuale = 8	
+	elif (percentuale_marketing > 48.0) and (percentuale_marketing < 54.0):
+		percentuale = "8+"
+	elif percentuale_marketing == 54.0:
+		percentuale = 9	
+	elif (percentuale_marketing > 54.0) and (percentuale_marketing < 60.0):
+		percentuale = "9+"
+	elif percentuale_marketing == 60.0:
+		percentuale = 10
+	elif (percentuale_marketing > 60.0) and (percentuale_marketing < 66.0):
+		percentuale = "10+"
+	elif percentuale_marketing == 66.0:
+		percentuale = 11
+	elif (percentuale_marketing > 66.0) and (percentuale_marketing < 72.0):
+		percentuale = "11+"
+	elif percentuale_marketing == 72.0:
+		percentuale = 12
+	elif (percentuale_marketing > 72.0) and (percentuale_marketing < 78.0):
+		percentuale = "12+"
+	elif percentuale_marketing == 78.0:
+		percentuale = 13
+	elif (percentuale_marketing > 78.0) and (percentuale_marketing < 84.0):
+		percentuale = "13+"
+	elif percentuale_marketing == 84.0:
+		percentuale = 14
+	elif (percentuale_marketing > 84.0) and (percentuale_marketing < 90.0):
+		percentuale = "14+"
+	elif percentuale_marketing == 90.0:
+		percentuale = 15
+	elif (percentuale_marketing > 90.0) and (percentuale_marketing < 96.0):
+		percentuale = "15+"
+	elif percentuale_marketing == 96.0:
+		percentuale = 16
+
+	return percentuale
+
 class azienda_id(View):
 	def dispatch(self, *args, **kwargs):
 		return super(azienda_id, self).dispatch(*args, **kwargs)
@@ -85,6 +153,11 @@ class azienda_id(View):
 
 		su = Partner.objects.get(id = id)
 
+		contratto = ContrattoMarketing.objects.get(partners = su)
+		percentuale_marketing = contratto.percentuale_marketing	
+
+		percentuale = get_percentuale(percentuale_marketing)
+
 		json_su = {
 			"id" : su.id,
 			"foto" : str(su.foto),
@@ -92,10 +165,8 @@ class azienda_id(View):
 			"telefono" : su.telefono_fisso,
 			"ragione_sociale" : su.ragione_sociale,
 			"indirizzo" : su.indirizzo,
-			"tribu_1" : su.tribu_1,
-			"tribu_2" : su.tribu_2,
-			"tribu_3" : su.tribu_3,
-			"tribu_4" : su.tribu_4
+			"tribu" : su.tribu,
+			"percentuale" : percentuale
 		}
 
 		return JsonResponse(json_su)
@@ -137,6 +208,8 @@ class azienda_pagamento(View):
 		utente_punti_vecchi = utente.punti
 		utente.punti = utente_punti_vecchi + pp 
 		utente.save()
+
+		notifica_pagamento(utente, pp, partner.ragione_sociale)
 
 		if utente.tribu:
 			tribu_utente = utente.tribu.nome

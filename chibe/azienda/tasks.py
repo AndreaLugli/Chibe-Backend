@@ -3,6 +3,7 @@ from celery import shared_task
 from .models import Partner, Acquisto
 from main.models import Tribu
 from datetime import date, datetime, timedelta
+from chibe.push import push_generic
 
 @shared_task
 def salute():
@@ -16,7 +17,6 @@ def notifica_perdenti(p, old_t):
 	ac = Acquisto.objects.filter(partner = p, utente__tribu = old_t, timestamp__gte=last_week, timestamp__lte=now)
 	for a in ac:
 		utente = a.utente
-		print utente
 
 @shared_task
 def notifica_vincenti(p, t):
@@ -26,7 +26,6 @@ def notifica_vincenti(p, t):
 	ac = Acquisto.objects.filter(partner = p, utente__tribu = t, timestamp__gte=last_week, timestamp__lte=now)
 	for a in ac:
 		utente = a.utente
-		print utente
 
 @shared_task
 def check_tribu():

@@ -33,7 +33,8 @@ class SearchQueryset(models.query.QuerySet):
 		for su in self:
 
 			esiste_contratto = ContrattoMarketing.objects.filter(inizio__lte = now, fine__gte = now, partners = su).exists()
-			if esiste_contratto:
+			attivo = su.attivo
+			if esiste_contratto and attivo:
 				point = (su.latitudine, su.longitudine)
 				distanza = haversine(center_point, point)
 

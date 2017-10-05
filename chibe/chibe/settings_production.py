@@ -1,6 +1,7 @@
 import os 
 
 DEBUG = True
+IS_DEBUG = True
 CORS_ORIGIN_ALLOW_ALL = True
 
 DATABASES = {

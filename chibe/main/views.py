@@ -2,6 +2,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
 from chibe.email_system import email_reset_password
+from chibe.push import notifica_amico
 from django.core.urlresolvers import reverse
 from django.views.generic import View
 from django.contrib.auth import authenticate, login
@@ -908,6 +909,8 @@ class utente_invito(View):
 		utente_punti_vecchi = utente.punti
 		utente.punti = utente_punti_vecchi + pp_vecchio
 		utente.save()
+
+		notifica_amico(utente, pp_nuovo)
 
 		args = {
 			"success" : True,
