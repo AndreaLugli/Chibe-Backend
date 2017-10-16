@@ -234,7 +234,6 @@ class utente_step1(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		nome = request.POST['nome']
@@ -260,7 +259,6 @@ class utente_step1_fb(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		cellulare = request.POST['cellulare']
@@ -282,7 +280,6 @@ class utente_step2(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		#Gestione avatar
@@ -330,7 +327,6 @@ class utente_step3(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		provincia_id = request.POST['provincia_id']
@@ -341,6 +337,12 @@ class utente_step3(View):
 
 		classe = request.POST.get("classe", None)
 		newsletter = request.POST.get("newsletter", None)
+
+		sesso = request.POST['sesso']
+		compleanno = request.POST['compleanno'] #2017-01-21 - YYYY-MM-DD
+		compleanno_obj = datetime.strptime(compleanno, '%Y-%M-%d').date()
+		utente.compleanno = compleanno_obj
+		utente.sesso = sesso
 
 		utente.classe = classe
 		utente.provincia = provincia
@@ -380,7 +382,6 @@ def upload_picture(request):
 def get_code(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
 	return HttpResponse(codice)
@@ -388,7 +389,6 @@ def get_code(request):
 def search_amico(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	amico = request.GET.get("amico", None)
@@ -409,10 +409,9 @@ def search_amico(request):
 def utente_amici(request):
 	user = request.user
 	username = user.username
-	#username = "senblet"
 	utente = Utente.objects.get(username = username)
 
-	amici = utente.amici.all().values("username", "id", "first_name", "last_name")
+	amici = utente.amici.all().values("username", "id", "first_name", "last_name", "punti", "avatar")
 
 	return JsonResponse(list(amici), safe = False)
 
@@ -420,7 +419,6 @@ def utente_amici(request):
 def utente_amico_add(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	id_amico = request.POST['id_amico']
@@ -434,7 +432,6 @@ def utente_amico_add(request):
 def utente_amico_delete(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	id_amico = request.POST['id_amico']
@@ -448,7 +445,6 @@ def utente_amico_delete(request):
 def utente_info(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -476,7 +472,8 @@ def utente_info(request):
 		"cognome" : utente.last_name,
 		"punti" : utente.punti,
 		"tribu" : tribu_name,
-		"modifica_tribu" : modifica_tribu
+		"modifica_tribu" : modifica_tribu,
+		"sesso" : utente.sesso
 	}
 
 	return JsonResponse(json_utente)	
@@ -485,7 +482,6 @@ def utente_info(request):
 def utente_tribu(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	tribu = request.POST['tribu']
@@ -509,7 +505,6 @@ def utente_tribu(request):
 def utente_modifica(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	descrizione = request.POST['descrizione']
@@ -524,7 +519,6 @@ def utente_modifica(request):
 def utente_desideri(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	gruppi = Gruppo.objects.filter(utenti = utente)

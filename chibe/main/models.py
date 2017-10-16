@@ -14,6 +14,10 @@ class Provincia(models.Model):
 	def __unicode__(self):
 		return self.nome
 
+	class Meta:
+		verbose_name = "Provincia"
+		verbose_name_plural = "Provincie"			
+
 class Scuola(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
 	provincia = models.ForeignKey(Provincia, blank = True, null = True)
@@ -57,6 +61,14 @@ class Utente(User):
 	tribu_timestamp = models.DateField(blank = True, null = True)
 
 	amici = models.ManyToManyField("self", blank = True)
+
+	SESSO = (
+		("M", "Maschio"),
+		("F", "Femmina"),
+	)
+
+	sesso = models.CharField(max_length = 3, choices = SESSO, default = "M")
+	compleanno = models.DateField(blank=True, null=True)	
 
 	def invite_link(self):
 		invite_link_url = reverse('utente_invito', kwargs = {'token': self.codice})

@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core import serializers
 from chibe.push import notifica_pagamento
+from chibe.utils import get_percentuale
 
 from azienda.models import Partner, Categoria, Acquisto, ContrattoMarketing
 from main.models import Tribu, Utente
@@ -27,7 +28,6 @@ class azienda_login(View):
 
 		if user is not None:
 			username = user.username
-			#username = "868051020276493"
 			partner = Partner.objects.get(username = username)
 
 			attivo = partner.attivo
@@ -54,9 +54,8 @@ class azienda_categorie(View):
 		return super(azienda_categorie, self).dispatch(*args, **kwargs)
 
 	def get(self, request, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "868051020276493"
+		user = request.user
+		username = user.username
 		partner = Partner.objects.get(username = username)
 		
 		categorie = partner.categorie.all()
@@ -64,6 +63,9 @@ class azienda_categorie(View):
 
 		return HttpResponse(data)
 
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from operator import itemgetter
 class azienda_search(View):
 	def dispatch(self, *args, **kwargs):
 		return super(azienda_search, self).dispatch(*args, **kwargs)
@@ -76,74 +78,39 @@ class azienda_search(View):
 
 		partners = Partner.objects_search.search(latitude, longitude, distanza)
 
-		return JsonResponse(partners, safe = False)
+		order = request.GET.get("order", "vicini")
 
+		if order == "vicini":
+			partners = sorted(partners, key=itemgetter('distanza'))
+		elif order == "promo":
+			partners = sorted(partners, key=itemgetter('percentuale_val'), reverse = True)
+		elif order == "news":
+			partners = sorted(partners, key=itemgetter('date_joined'), reverse = True)
+		elif order == "combattuti":
+			partners = sorted(partners, key=itemgetter('importo'), reverse = True)
+		elif order == "tribu":
+			user = request.user
+			username = user.username
+			utente = Utente.objects.get(username = username)
+			tribu = utente.tribu
+			if tribu:
+				tribu_val = tribu.nome
+				partners = [d for d in partners if d['tribu'] == tribu_val]
 
-def get_percentuale(percentuale_marketing):
-	if percentuale_marketing <= 6.0:
-		percentuale = 1
-	elif (percentuale_marketing > 6.0) and (percentuale_marketing < 12.0):
-		percentuale = "1+"
-	elif percentuale_marketing == 12.0:
-		percentuale = 2
-	elif (percentuale_marketing > 12.0) and (percentuale_marketing < 18.0):
-		percentuale = "2+"
-	elif percentuale_marketing == 18.0:
-		percentuale = 3	
-	elif (percentuale_marketing > 18.0) and (percentuale_marketing < 24.0):
-		percentuale = "3+"
-	elif percentuale_marketing == 24.0:
-		percentuale = 4	
-	elif (percentuale_marketing > 24.0) and (percentuale_marketing < 30.0):
-		percentuale = "4+"
-	elif percentuale_marketing == 30.0:
-		percentuale = 5	
-	elif (percentuale_marketing > 30.0) and (percentuale_marketing < 36.0):
-		percentuale = "5+"
-	elif percentuale_marketing == 36.0:
-		percentuale = 6	
-	elif (percentuale_marketing > 36.0) and (percentuale_marketing < 42.0):
-		percentuale = "6+"
-	elif percentuale_marketing == 42.0:
-		percentuale = 7	
-	elif (percentuale_marketing > 42.0) and (percentuale_marketing < 48.0):
-		percentuale = "7+"
-	elif percentuale_marketing == 48.0:
-		percentuale = 8	
-	elif (percentuale_marketing > 48.0) and (percentuale_marketing < 54.0):
-		percentuale = "8+"
-	elif percentuale_marketing == 54.0:
-		percentuale = 9	
-	elif (percentuale_marketing > 54.0) and (percentuale_marketing < 60.0):
-		percentuale = "9+"
-	elif percentuale_marketing == 60.0:
-		percentuale = 10
-	elif (percentuale_marketing > 60.0) and (percentuale_marketing < 66.0):
-		percentuale = "10+"
-	elif percentuale_marketing == 66.0:
-		percentuale = 11
-	elif (percentuale_marketing > 66.0) and (percentuale_marketing < 72.0):
-		percentuale = "11+"
-	elif percentuale_marketing == 72.0:
-		percentuale = 12
-	elif (percentuale_marketing > 72.0) and (percentuale_marketing < 78.0):
-		percentuale = "12+"
-	elif percentuale_marketing == 78.0:
-		percentuale = 13
-	elif (percentuale_marketing > 78.0) and (percentuale_marketing < 84.0):
-		percentuale = "13+"
-	elif percentuale_marketing == 84.0:
-		percentuale = 14
-	elif (percentuale_marketing > 84.0) and (percentuale_marketing < 90.0):
-		percentuale = "14+"
-	elif percentuale_marketing == 90.0:
-		percentuale = 15
-	elif (percentuale_marketing > 90.0) and (percentuale_marketing < 96.0):
-		percentuale = "15+"
-	elif percentuale_marketing == 96.0:
-		percentuale = 16
+		paginator = Paginator(partners, 10)
 
-	return percentuale
+		page = request.GET.get("page")
+
+		try:
+			partners_list = paginator.page(page)
+		except PageNotAnInteger:
+			partners_list = paginator.page(1)
+		except EmptyPage:
+			partners_list = paginator.page(paginator.num_pages)
+
+		partners_output = partners_list.object_list
+
+		return JsonResponse(partners_output, safe = False)
 
 class azienda_id(View):
 	def dispatch(self, *args, **kwargs):
@@ -158,6 +125,11 @@ class azienda_id(View):
 
 		percentuale = get_percentuale(percentuale_marketing)
 
+		tribu = su.tribu
+		tibu_str = None
+		if tribu:
+			tribu_str = tribu.nome
+
 		json_su = {
 			"id" : su.id,
 			"foto" : str(su.foto),
@@ -165,7 +137,7 @@ class azienda_id(View):
 			"telefono" : su.telefono_fisso,
 			"ragione_sociale" : su.ragione_sociale,
 			"indirizzo" : su.indirizzo,
-			"tribu" : su.tribu,
+			"tribu" : tribu_str,
 			"percentuale" : percentuale
 		}
 
@@ -180,7 +152,6 @@ class azienda_pagamento(View):
 	def post(self, request, *args, **kwargs):	
 		user = request.user
 		username = user.username
-		#username = "868051020276493"
 		partner = Partner.objects.get(username = username)
 
 		categoria_id = request.POST['categoria_id']

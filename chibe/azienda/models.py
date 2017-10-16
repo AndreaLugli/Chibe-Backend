@@ -3,9 +3,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from main.models import Tribu, Utente
 from datetime import date, datetime
 from haversine import haversine
+from chibe.utils import get_percentuale
 
 class Categoria(models.Model):
 	nome = models.CharField(max_length = 300)
@@ -38,7 +40,15 @@ class SearchQueryset(models.query.QuerySet):
 				point = (su.latitudine, su.longitudine)
 				distanza = haversine(center_point, point)
 
+				contratto = ContrattoMarketing.objects.get(inizio__lte = now, fine__gte = now, partners = su)
+				percentuale_marketing = contratto.percentuale_marketing
+				percentuale = get_percentuale(percentuale_marketing)
+				percentuale_val = int(percentuale.replace("+", ""))
+
 				if distanza < limite:
+
+					importo = Acquisto.objects.filter(partner = su).aggregate(Sum('importo'))
+
 
 					orsi = su.orsi
 					aquile = su.aquile
@@ -63,7 +73,11 @@ class SearchQueryset(models.query.QuerySet):
 						"lupi" : lupi,
 						"puma" : puma,
 						"volpi" : volpi,
-						"tribu" : tribu_val
+						"tribu" : tribu_val,
+						"percentuale" : percentuale,
+						"percentuale_val" : percentuale_val,
+						"date_joined" : su.date_joined,
+						"importo" : importo['importo__sum']
 					}
 
 					result_list.append(json_su)

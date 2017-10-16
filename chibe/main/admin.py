@@ -18,7 +18,7 @@ def test_push(modeladmin, request, queryset):
 
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
-	list_display = ['username', 'tribu', 'punti', 'avatar', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe', 'invite_link']
+	list_display = ['username', 'tribu', 'punti', 'avatar', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe', 'sesso', 'compleanno', 'invite_link']
 
 @admin.register(OnBoard)
 class OnBoardAdmin(admin.ModelAdmin):

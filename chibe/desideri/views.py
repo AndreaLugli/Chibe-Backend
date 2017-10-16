@@ -48,7 +48,6 @@ class desideri_id(View):
 	def post(self, request, id, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)		
 
 		d = Desiderio.objects.get(pk = id)
