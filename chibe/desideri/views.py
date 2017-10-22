@@ -21,7 +21,7 @@ def desideri_home(request):
 		"descrizione_breve", 
 		"in_evidenza", 
 		"num_gruppo", 
-		"costo_riscatto"
+		"costo_riscatto",
 	)
 
 	return JsonResponse(list(desideri), safe = False)
@@ -40,7 +40,7 @@ class desideri_id(View):
 			"descrizione_lunga" : d.descrizione_lunga,
 			"immagine" : d.immagine,
 			"num_gruppo" : d.num_gruppo,
-			"costo_riscatto" : d.costo_riscatto
+			"costo_riscatto" : d.punti_piuma()
 		}
 
 		return JsonResponse(desiderio_json, safe = False)

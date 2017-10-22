@@ -12,7 +12,7 @@ class CategoriaDesiderio(models.Model):
 
 	class Meta:
 		verbose_name = "Categoria desiderio"
-		verbose_name_plural = "Categorie desiderio"	
+		verbose_name_plural = "2. Categorie desiderio"	
 
 class Desiderio(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
@@ -41,11 +41,11 @@ class Desiderio(models.Model):
 		return self.nome
 
 	def punti_piuma(self):
-		return self.costo_riscatto / 0.01
+		return self.costo_riscatto / 0.001
 
 	class Meta:
 		verbose_name = "Desiderio"
-		verbose_name_plural = "Desideri"	
+		verbose_name_plural = "1. Desideri"	
 
 
 

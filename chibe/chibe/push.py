@@ -4,7 +4,7 @@ from chibe.tasks import send_push_gcm, send_push_apns
 from main.models import PushNotification
 from django.conf import settings
 
-IS_LOCAL = settings.DEBUG
+IS_LOCAL = settings.IS_LOCAL
 
 def push_generic(member, content):
 	send_push(member, content)

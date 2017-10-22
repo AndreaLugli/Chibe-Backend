@@ -18,7 +18,7 @@ class Categoria(models.Model):
 
 	class Meta:
 		verbose_name = "Categoria"
-		verbose_name_plural = "Categorie"
+		verbose_name_plural = "4. Categorie"
 
 
 class SearchQueryset(models.query.QuerySet):
@@ -60,6 +60,10 @@ class SearchQueryset(models.query.QuerySet):
 					if tribu:
 						tribu_val = tribu.nome
 
+					categoria_partner_val = ""
+					if su.categoria_partner:
+						categoria_partner_val = su.categoria_partner
+
 					json_su = {
 						"id" : su.id,
 						"foto" : str(su.foto),
@@ -77,7 +81,8 @@ class SearchQueryset(models.query.QuerySet):
 						"percentuale" : percentuale,
 						"percentuale_val" : percentuale_val,
 						"date_joined" : su.date_joined,
-						"importo" : importo['importo__sum']
+						"importo" : importo['importo__sum'],
+						"categoria_partner" : categoria_partner_val
 					}
 
 					result_list.append(json_su)
@@ -102,12 +107,22 @@ class Partner(User):
 	telefono_fisso = models.CharField(max_length = 300, blank = True, null = True)
 	telefono_cellulare = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione = models.TextField(blank = True, null = True)
+
+	CATEGORIA_PARTNER = (
+		("RIS", "Ristoranti"),
+		("ABB", "Abbigliamento"),
+		("BAR", "Bar"),
+		("SPO", "Sport"),
+		("TEC", "Tech")
+	)
+
+	categoria_partner = models.CharField(max_length = 3, choices = CATEGORIA_PARTNER, blank = True, null = True)	
+
 	categorie = models.ManyToManyField(Categoria)
 	foto = models.ImageField(blank = True, null = True)
 	attivo = models.BooleanField(default = True) 
 
 	is_fornitore = models.BooleanField(default = False)
-	famoco_id = models.CharField(max_length = 300, blank = True, null = True)
 	tribu = models.ForeignKey(Tribu, blank = True, null = True)
 
 	orsi = models.IntegerField(default=0)
@@ -121,7 +136,7 @@ class Partner(User):
 
 	class Meta:
 		verbose_name = "Partner"
-		verbose_name_plural = "Partners"
+		verbose_name_plural = "1. Partners"
 
 	@staticmethod
 	def post_save(sender, **kwargs):
@@ -157,7 +172,7 @@ class Acquisto(models.Model):
 
 	class Meta:
 		verbose_name = "Acquisto"
-		verbose_name_plural = "Acquisti"
+		verbose_name_plural = "3. Acquisti"
 
 class ContrattoMarketing(models.Model):
 	partners = models.ManyToManyField(Partner)
@@ -183,4 +198,8 @@ class ContrattoMarketing(models.Model):
 		today = date.today()
 
 		return today < fine
+
+	class Meta:
+		verbose_name = "Contratto Marketing"
+		verbose_name_plural = "2. Contratto Marketing"
 

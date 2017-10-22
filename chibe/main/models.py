@@ -16,7 +16,7 @@ class Provincia(models.Model):
 
 	class Meta:
 		verbose_name = "Provincia"
-		verbose_name_plural = "Provincie"			
+		verbose_name_plural = "3. Provincie"			
 
 class Scuola(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
@@ -27,7 +27,7 @@ class Scuola(models.Model):
 
 	class Meta:
 		verbose_name = "Scuola"
-		verbose_name_plural = "Scuole"	
+		verbose_name_plural = "2. Scuole"	
 
 class Tribu(models.Model):
 	nome = models.CharField(max_length = 300, blank = True, null = True)
@@ -78,7 +78,7 @@ class Utente(User):
 
 	class Meta:
 		verbose_name = "Utente"
-		verbose_name_plural = "Utente"
+		verbose_name_plural = "1. Utente"
 
 class Gruppo(models.Model):
 	desiderio = models.ForeignKey(Desiderio)

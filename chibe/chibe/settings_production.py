@@ -1,7 +1,8 @@
 import os 
 
-DEBUG = True
-IS_DEBUG = True
+IS_LOCAL = False
+DEBUG = False
+IS_DEBUG = False
 CORS_ORIGIN_ALLOW_ALL = True
 
 DATABASES = {
@@ -44,12 +45,12 @@ LOGGING = {
 			'class': 'logging.StreamHandler',
 			'formatter': 'verbose'
 		},
-		# 'mail_admins': {
-		# 	'level': 'ERROR',
-		# 	'class': 'django.utils.log.AdminEmailHandler',
-		# 	'include_html': True,
-		# 	'filters': ['special']
-		# },
+		'mail_admins': {
+			'level': 'ERROR',
+			'class': 'django.utils.log.AdminEmailHandler',
+			'include_html': True,
+			'filters': ['special']
+		},
 		'debug_file': {
 			'level': 'DEBUG',
 			'class': 'logging.FileHandler',
@@ -69,7 +70,7 @@ LOGGING = {
 			'propagate': False,
 		},
 		'django.request': {
-			'handlers': ['debug_file', 'error_file'],
+			'handlers': ['debug_file', 'error_file', 'mail_admins'],
 			'level': 'DEBUG',
 			'propagate': True,
 		},	

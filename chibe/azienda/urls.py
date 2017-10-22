@@ -15,6 +15,5 @@ urlpatterns = [
 	url(r'^pagamento/', azienda_pagamento.as_view(), name = "azienda_pagamento"),
 	url(r'^search', azienda_search.as_view(), name = "azienda_search"),
 	url(r'^(?P<id>[0-9]+)/', azienda_id.as_view(), name = "azienda_id"),
-
 	url(r'^test/', test, name = "test"),
 ]

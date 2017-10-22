@@ -106,9 +106,12 @@ class azienda_search(View):
 		except PageNotAnInteger:
 			partners_list = paginator.page(1)
 		except EmptyPage:
-			partners_list = paginator.page(paginator.num_pages)
+			partners_list = []
 
-		partners_output = partners_list.object_list
+		if partners_list:
+			partners_output = partners_list.object_list
+		else:
+			partners_output = []
 
 		return JsonResponse(partners_output, safe = False)
 
@@ -126,7 +129,7 @@ class azienda_id(View):
 		percentuale = get_percentuale(percentuale_marketing)
 
 		tribu = su.tribu
-		tibu_str = None
+		tribu_str = None
 		if tribu:
 			tribu_str = tribu.nome
 
@@ -240,6 +243,7 @@ def calcolo_punti(partner, acquisto):
 from .tasks import salute, check_tribu
 def test(request):
 	#check_tribu()
+	2/0
 	return HttpResponse("Successo!!!")
 
 

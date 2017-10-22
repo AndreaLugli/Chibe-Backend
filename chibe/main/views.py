@@ -551,7 +551,6 @@ def utente_desideri(request):
 def utente_punti(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 	punti = utente.punti
 
@@ -561,7 +560,6 @@ def utente_punti(request):
 def utente_inviapunti(request):
 	user = request.user
 	username = user.username
-	#username = "bella"
 	utente = Utente.objects.get(username = username)
 
 	amico_id = request.POST['amico_id']
@@ -590,7 +588,6 @@ class utente_gruppo(View):
 	def get(self, request, id, *args, **kwargs):	
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -624,7 +621,6 @@ class utente_gruppo(View):
 	def post(self, request, id, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
