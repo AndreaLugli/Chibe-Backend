@@ -43,7 +43,12 @@ class SearchQueryset(models.query.QuerySet):
 				contratto = ContrattoMarketing.objects.get(inizio__lte = now, fine__gte = now, partners = su)
 				percentuale_marketing = contratto.percentuale_marketing
 				percentuale = get_percentuale(percentuale_marketing)
-				percentuale_val = int(percentuale.replace("+", ""))
+
+				if isinstance(percentuale, basestring):
+					percentuale_val = percentuale.replace('+', "")
+					percentuale_val = int(percentuale_val)
+				else:
+					percentuale_val = percentuale
 
 				if distanza < limite:
 

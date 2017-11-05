@@ -62,4 +62,4 @@ def get_percentuale(percentuale_marketing):
 	elif percentuale_marketing == 96.0:
 		percentuale = 16
 
-	return percentuale
+	return str(percentuale)

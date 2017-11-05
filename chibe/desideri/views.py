@@ -52,10 +52,22 @@ class desideri_id(View):
 
 		d = Desiderio.objects.get(pk = id)
 
-		gr, created = Gruppo.objects.get_or_create(desiderio = d, utente_admin = utente)
+		gruppo, created = Gruppo.objects.get_or_create(desiderio = d, utente_admin = utente)
 		
 		if created:
-			gr.utenti.add(utente)
+			gruppo.utenti.add(utente)
 
-		return HttpResponse()
+		utenti = gruppo.utenti.all().values("id")
+
+		gruppo_json = {
+			"id" : gruppo.id,
+			"punti" : gruppo.punti,
+			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"admin" : True,
+			"utenti" : list(utenti),
+			"nome" : gruppo.desiderio.nome,
+			"num_gruppo" : gruppo.desiderio.num_gruppo
+		}
+
+		return JsonResponse(gruppo_json)
 

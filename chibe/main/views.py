@@ -445,6 +445,7 @@ def utente_amico_delete(request):
 def utente_info(request):
 	user = request.user
 	username = user.username
+	#username = "ciaone"
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -714,11 +715,14 @@ class utente_register_push(View):
 		sistema_operativo = request.POST['sistema_operativo']
 		token = request.POST['token']
 
-		PushNotification.objects.create(
-			utente = utente,
-			sistema_operativo = sistema_operativo,
-			token = token
-		)
+		p_ex = PushNotification.objects.filter(utente = utente, sistema_operativo = sistema_operativo, token = token).exists()
+
+		if not p_ex:
+			PushNotification.objects.create(
+				utente = utente,
+				sistema_operativo = sistema_operativo,
+				token = token
+			)
 
 		return HttpResponse("")
 
@@ -913,7 +917,6 @@ class utente_invito(View):
 def utente_invitecode(request):
 	user = request.user
 	username = user.username
-	#username = "senblet"
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
 	return HttpResponse(codice)

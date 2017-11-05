@@ -41,7 +41,7 @@ class Desiderio(models.Model):
 		return self.nome
 
 	def punti_piuma(self):
-		return self.costo_riscatto / 0.001
+		return float(self.costo_riscatto) / 0.001
 
 	class Meta:
 		verbose_name = "Desiderio"
