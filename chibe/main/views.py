@@ -282,7 +282,6 @@ class utente_step2(View):
 		username = user.username
 		utente = Utente.objects.get(username = username)
 
-		#Gestione avatar
 		avatar = request.POST.get("avatar", None)
 		utente.avatar = avatar
 		utente.save()
@@ -339,7 +338,7 @@ class utente_step3(View):
 		newsletter = request.POST.get("newsletter", None)
 
 		sesso = request.POST['sesso']
-		compleanno = request.POST['compleanno'] #2017-01-21 - YYYY-MM-DD
+		compleanno = request.POST['compleanno']
 		compleanno_obj = datetime.strptime(compleanno, '%Y-%M-%d').date()
 		utente.compleanno = compleanno_obj
 		utente.sesso = sesso
@@ -445,7 +444,6 @@ def utente_amico_delete(request):
 def utente_info(request):
 	user = request.user
 	username = user.username
-	#username = "ciaone"
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -486,12 +484,6 @@ def utente_tribu(request):
 	utente = Utente.objects.get(username = username)
 
 	tribu = request.POST['tribu']
-
-	#orsi
-	#aquile
-	#lupi
-	#puma
-	#volpi
 
 	tribu_obj = Tribu.objects.get(nome__iexact = tribu)
 	tribu_timestamp = datetime.now().date()
@@ -535,14 +527,21 @@ def utente_desideri(request):
 
 		utenti = gruppo.utenti.all().values("id")
 
+		punti_necessari = float(gruppo.desiderio.costo_riscatto) / 0.001;
+		punti = float(gruppo.punti)
+	
+		percentuale = int((punti / punti_necessari) * 100)
+		percentuale = str(percentuale) + "%"
+
 		gruppo_json = {
 			"id" : gruppo.id,
-			"punti" : gruppo.punti,
-			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"punti" : punti,
+			"punti_necessari" : punti_necessari,
 			"admin" : admin,
 			"utenti" : list(utenti),
 			"nome" : gruppo.desiderio.nome,
-			"num_gruppo" : gruppo.desiderio.num_gruppo
+			"num_gruppo" : gruppo.desiderio.num_gruppo,
+			"percentuale" : percentuale
 		}
 
 		list_gruppi.append(gruppo_json)
@@ -651,7 +650,6 @@ class utente_gruppo_utenti(View):
 	def get(self, request, id, *args, **kwargs):	
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -689,7 +687,6 @@ class utente_gruppo_utenti(View):
 	def post(self, request, id, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "bella"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -709,7 +706,6 @@ class utente_register_push(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
-		#username = "piero"
 		utente = Utente.objects.get(username = username)
 
 		sistema_operativo = request.POST['sistema_operativo']
@@ -800,7 +796,6 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 		url_avatar = "http://graph.facebook.com/%s/picture?type=large"%response['id']
 		first_name = response['first_name']
 		last_name = response['last_name']
-		#email = response['email']
 		email = response.get("email", None)
 
 	now = datetime.now()

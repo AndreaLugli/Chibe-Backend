@@ -9,7 +9,8 @@ from django.utils.decorators import method_decorator
 from django.core import serializers
 from chibe.push import notifica_pagamento
 from chibe.utils import get_percentuale
-
+from datetime import timedelta
+from django.utils import timezone
 from azienda.models import Partner, Categoria, Acquisto, ContrattoMarketing
 from main.models import Tribu, Utente
 
@@ -115,6 +116,51 @@ class azienda_search(View):
 
 		return JsonResponse(partners_output, safe = False)
 
+def get_campo_di_battaglia(su):
+	some_day_last_week = timezone.now().date() - timedelta(days=7)
+
+	aquisti = Acquisto.objects.select_related("utente", "utente__tribu").filter(partner = su, timestamp__gte = some_day_last_week)
+
+	if aquisti:
+
+		volpi = 0
+		puma = 0
+		lupi = 0
+		aquile = 0
+		orsi = 0
+
+		for aq in aquisti:
+			importo = aq.importo
+			utente = aq.utente
+			tribu = utente.tribu
+
+			if tribu:
+				tribu_val = tribu.nome
+				if tribu_val == "volpi":
+					volpi = volpi + importo
+				elif tribu_val == "puma":
+					puma = puma + importo
+				elif tribu_val == "lupi":
+					lupi = lupi + importo
+				elif tribu_val == "aquile":
+					aquile = aquile + importo
+				elif tribu_val == "orsi":
+					orsi = orsi + importo
+
+		volpi_dict = {"nome" : "volpi", "totale" : volpi}
+		puma_dict = {"nome" : "puma", "totale" : puma}
+		lupi_dict = {"nome" : "lupi", "totale" : lupi}
+		aquile_dict = {"nome" : "aquile", "totale" : aquile}
+		orsi_dict = {"nome" : "orsi", "totale" : orsi}
+
+		list_tribu = [volpi_dict, puma_dict, lupi_dict, aquile_dict, orsi_dict]
+		newlist = sorted(list_tribu, key=lambda k: k['totale'], reverse=True) 
+
+		return newlist[0]['nome'], newlist[1]['nome']
+	else:
+		print "NO"
+		return None, None
+
 class azienda_id(View):
 	def dispatch(self, *args, **kwargs):
 		return super(azienda_id, self).dispatch(*args, **kwargs)
@@ -127,6 +173,8 @@ class azienda_id(View):
 		percentuale_marketing = contratto.percentuale_marketing	
 
 		percentuale = get_percentuale(percentuale_marketing)
+
+		tribu_1, tribu_2 = get_campo_di_battaglia(su)
 
 		tribu = su.tribu
 		tribu_str = None
@@ -141,6 +189,8 @@ class azienda_id(View):
 			"ragione_sociale" : su.ragione_sociale,
 			"indirizzo" : su.indirizzo,
 			"tribu" : tribu_str,
+			"tribu_1" : tribu_1,
+			"tribu_2" : tribu_2,
 			"percentuale" : percentuale
 		}
 

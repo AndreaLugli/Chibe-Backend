@@ -171,6 +171,7 @@ class Acquisto(models.Model):
 	partner = models.ForeignKey(Partner) 
 	utente = models.ForeignKey(Utente) 
 	timestamp = models.DateTimeField(auto_now_add = True)
+	#timestamp.editable=True
 
 	def __unicode__(self):
 		return str(self.importo)
