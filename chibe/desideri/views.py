@@ -15,13 +15,13 @@ def desideri_home(request):
 	desideri = Desiderio.objects.filter(
 		data_inizio__lte = now, 
 		data_fine__gte = now
-	).values(
+	).extra(select={'punti_piuma': "costo_riscatto/0.001"}).values(
 		"id", 
 		"nome",
 		"descrizione_breve", 
 		"in_evidenza", 
 		"num_gruppo", 
-		"costo_riscatto",
+		"punti_piuma",
 	)
 
 	return JsonResponse(list(desideri), safe = False)
@@ -40,14 +40,15 @@ class desideri_id(View):
 			"descrizione_lunga" : d.descrizione_lunga,
 			"immagine" : d.immagine,
 			"num_gruppo" : d.num_gruppo,
-			"costo_riscatto" : d.punti_piuma()
+			"punti_piuma" : d.punti_piuma()
 		}
 
 		return JsonResponse(desiderio_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		user = request.user
-		username = user.username
+		#user = request.user
+		#username = user.username
+		username = "negro"
 		utente = Utente.objects.get(username = username)		
 
 		d = Desiderio.objects.get(pk = id)
@@ -62,7 +63,7 @@ class desideri_id(View):
 		gruppo_json = {
 			"id" : gruppo.id,
 			"punti" : gruppo.punti,
-			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"punti_necessari" : gruppo.desiderio.punti_piuma(),
 			"admin" : True,
 			"utenti" : list(utenti),
 			"nome" : gruppo.desiderio.nome,

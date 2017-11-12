@@ -86,6 +86,16 @@ class Gruppo(models.Model):
 	utenti = models.ManyToManyField(Utente, related_name = "utenti")
 	punti = models.IntegerField(default = 0)
 
+	def is_conquistato(self):
+		punti = self.punti
+		desiderio = self.desiderio
+		punti_piuma = desiderio.punti_piuma()
+
+		if punti >= punti_piuma:
+			return True
+		else:
+			return False
+
 	class Meta:
 		verbose_name = "Gruppo"
 		verbose_name_plural = "Gruppi"	
@@ -107,6 +117,9 @@ class OrdineDesiderio(models.Model):
 	timestamp = models.DateTimeField(auto_now_add = True)
 	gruppo = models.ForeignKey(Gruppo)
 	partner_ritirato = models.ForeignKey("azienda.Partner", blank = True, null = True)
+	ritirato = models.BooleanField(default = False)
+	timestamp_ritiro = models.DateTimeField(blank = True, null = True)
+	token = models.CharField(max_length = 300)
 
 	class Meta:
 		verbose_name = "Ordine desideiro"

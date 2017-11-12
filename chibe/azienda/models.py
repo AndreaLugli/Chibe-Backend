@@ -154,7 +154,6 @@ class Partner(User):
 
 post_save.connect(Partner.post_save, sender=Partner)
 
-
 class Supervisore(models.Model):
 	etichetta = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione = models.TextField(blank = True, null = True)

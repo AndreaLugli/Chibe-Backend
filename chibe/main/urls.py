@@ -21,6 +21,7 @@ from .views import utente_gruppo, utente_gruppo_utenti
 from .views import utente_register_push
 from .views import register_by_access_token
 from .views import utente_invitecode
+from .views import utente_gruppo_riscatta
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -50,6 +51,7 @@ urlpatterns = [
 	url(r'^invia-punti/$', utente_inviapunti, name = 'utente_inviapunti'),
 	url(r'^gruppo/(?P<id>[0-9]+)/$', utente_gruppo.as_view(), name = "utente_gruppo"),	
 	url(r'^gruppo/(?P<id>[0-9]+)/utenti/$', utente_gruppo_utenti.as_view(), name = "utente_gruppo_utenti"),	
+	url(r'^gruppo/(?P<id>[0-9]+)/riscatta/$', utente_gruppo_riscatta.as_view(), name = "utente_gruppo_riscatta"),	
 
 	url(r'^register-push/', utente_register_push.as_view(), name = "utente_register_push"),
 

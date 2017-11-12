@@ -75,7 +75,7 @@ class azienda_search(View):
 
 		latitude = request.GET['latitude']
 		longitude = request.GET['longitude']
-		distanza = float(100)
+		distanza = float(10)
 
 		partners = Partner.objects_search.search(latitude, longitude, distanza)
 

@@ -31,8 +31,8 @@ class Desiderio(models.Model):
 	sku = models.IntegerField()
 
 	indirizzo = models.CharField(max_length = 300, blank = True, null = True)
-	latitudine = models.CharField(max_length = 300, blank = True, null = True)
-	longitudine = models.CharField(max_length = 300, blank = True, null = True)
+
+	partners = models.ManyToManyField("azienda.Partner", blank = True)
 
 	codice = models.CharField(max_length = 300, blank = True, null = True)
 	num_gruppo = models.IntegerField()

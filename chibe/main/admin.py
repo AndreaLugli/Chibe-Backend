@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib import admin
 
-from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotification
+from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotification, PuntiGruppo, OrdineDesiderio
 from chibe.tasks import send_push_gcm, send_push_apns
 
 def test_push(modeladmin, request, queryset):
@@ -19,6 +19,7 @@ def test_push(modeladmin, request, queryset):
 @admin.register(Utente)
 class UtenteAdmin(admin.ModelAdmin):
 	list_display = ['username', 'tribu', 'punti', 'avatar', 'codice', 'email', 'first_name', 'last_name', 'telefono_cellulare', 'provincia', 'scuola', 'classe', 'sesso', 'compleanno', 'invite_link']
+	fields = ('username', 'first_name', 'last_name', 'email', 'avatar', 'classe', 'telefono_cellulare', 'descrizione', 'status', 'codice', 'punti', 'provincia', 'scuola', 'tribu', 'tribu_timestamp', 'amici', 'sesso', 'compleanno')
 
 @admin.register(OnBoard)
 class OnBoardAdmin(admin.ModelAdmin):
@@ -39,6 +40,14 @@ class TribuAdmin(admin.ModelAdmin):
 @admin.register(Gruppo)
 class GruppoAdmin(admin.ModelAdmin):
 	list_display = ['desiderio', 'utente_admin', 'punti']
+
+@admin.register(PuntiGruppo)
+class PuntiGruppoAdmin(admin.ModelAdmin):
+	pass
+
+@admin.register(OrdineDesiderio)
+class OrdineDesiderioAdmin(admin.ModelAdmin):
+	pass
 
 @admin.register(PushNotification)
 class PushNotificationAdmin(admin.ModelAdmin):

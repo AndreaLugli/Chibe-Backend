@@ -15,7 +15,7 @@ from datetime import datetime
 from random import randint
 from .models import Utente, OnBoard, Tribu, ResetPassword
 from .models import Provincia, Scuola
-from .models import Gruppo, PuntiGruppo
+from .models import Gruppo, PuntiGruppo, OrdineDesiderio
 from .models import PushNotification
 from social_django.models import UserSocialAuth
 from django.conf import settings
@@ -226,6 +226,14 @@ def generate_code():
 
 	return code 
 
+def generate_code_ordine():
+	code = randint(100000000, 999999999)
+
+	while OrdineDesiderio.objects.filter(token = str(code)).exists():
+		code = randint(100000000, 999999999)
+
+	return code 
+
 class utente_step1(View):
 	@method_decorator(csrf_exempt)
 	def dispatch(self, *args, **kwargs):
@@ -262,8 +270,14 @@ class utente_step1_fb(View):
 		utente = Utente.objects.get(username = username)
 
 		cellulare = request.POST['cellulare']
+		username = request.POST['username']
+
+		username_ex = Utente.objects.filter(username = username).exists()
+		if username_ex:
+			return HttpResponseBadRequest("Username già in uso")
 
 		utente.telefono_cellulare = cellulare
+		utente.username = username
 		utente.save()
 
 		onboard_obj = OnBoard.objects.get(utente = utente)
@@ -442,8 +456,9 @@ def utente_amico_delete(request):
 
 @csrf_exempt
 def utente_info(request):
-	user = request.user
-	username = user.username
+	#user = request.user
+	#username = user.username
+	username = "negro"
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -510,8 +525,9 @@ def utente_modifica(request):
 
 @csrf_exempt
 def utente_desideri(request):
-	user = request.user
-	username = user.username
+	#user = request.user
+	#username = user.username
+	username = "negro"
 	utente = Utente.objects.get(username = username)
 
 	gruppi = Gruppo.objects.filter(utenti = utente)
@@ -586,11 +602,12 @@ class utente_gruppo(View):
 		return super(utente_gruppo, self).dispatch(*args, **kwargs)
 
 	def get(self, request, id, *args, **kwargs):	
-		user = request.user
-		username = user.username
+		#user = request.user
+		#username = user.username
+		username = "negro"
 		utente = Utente.objects.get(username = username)
 
-		gruppo = Gruppo.objects.get(pk = id)
+		gruppo = Gruppo.objects.select_related('desiderio').get(pk = id)
 
 		list_gruppi = []
 
@@ -602,16 +619,31 @@ class utente_gruppo(View):
 		utenti = gruppo.utenti.all().values("id")
 
 		miei_punti = utente.punti
+		ordine_riscattato = OrdineDesiderio.objects.filter(gruppo = gruppo).exists()
+		codice_ordine = None
+		ritirato = False
+		partners = []
+		if ordine_riscattato:
+			ordine_obj = OrdineDesiderio.objects.get(gruppo = gruppo)
+			partners = gruppo.desiderio.partners.all().values("ragione_sociale", "indirizzo")
+			partners = list(partners)
+			codice_ordine = ordine_obj.token
+			ritirato = ordine_obj.ritirato
 
 		gruppo_json = {
 			"id" : gruppo.id,
 			"punti" : gruppo.punti,
-			"punti_necessari" : gruppo.desiderio.costo_riscatto,
+			"punti_necessari" : gruppo.desiderio.punti_piuma(),
 			"admin" : admin,
 			"utenti" : list(utenti),
 			"nome" : gruppo.desiderio.nome,
 			"num_gruppo" : gruppo.desiderio.num_gruppo,
-			"miei_punti" : miei_punti
+			"miei_punti" : miei_punti,
+			"conquistato" : gruppo.is_conquistato(),
+			"ordine_riscattato" : ordine_riscattato,
+			"codice_ordine" : codice_ordine,
+			"partners" : partners,
+			"ritirato" : ritirato
 		}
 
 		list_gruppi.append(gruppo_json)
@@ -619,8 +651,9 @@ class utente_gruppo(View):
 		return JsonResponse(gruppo_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		user = request.user
-		username = user.username
+		#user = request.user
+		#username = user.username
+		username = "negro"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -642,14 +675,37 @@ class utente_gruppo(View):
 
 		return HttpResponse()
 
+class utente_gruppo_riscatta(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_gruppo_riscatta, self).dispatch(*args, **kwargs)
+
+	def post(self, request, id, *args, **kwargs):	
+		#user = request.user
+		#username = user.username
+		username = "negro"
+		utente = Utente.objects.get(username = username)
+
+		gruppo = Gruppo.objects.get(pk = id)
+
+		ordine_ex = OrdineDesiderio.objects.filter(gruppo = gruppo).exists()
+
+		if not ordine_ex:
+			token = generate_code_ordine()
+			OrdineDesiderio.objects.create(gruppo = gruppo, token = token)
+
+		return HttpResponse()
+
+
 class utente_gruppo_utenti(View):
 	@method_decorator(csrf_exempt)
 	def dispatch(self, *args, **kwargs):
 		return super(utente_gruppo_utenti, self).dispatch(*args, **kwargs)
 
 	def get(self, request, id, *args, **kwargs):	
-		user = request.user
-		username = user.username
+		#user = request.user
+		#username = user.username
+		username = "negro"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -685,8 +741,9 @@ class utente_gruppo_utenti(View):
 		return JsonResponse(gruppo_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		user = request.user
-		username = user.username
+		#user = request.user
+		#username = user.username
+		username = "negro"
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
