@@ -14,7 +14,8 @@ def desideri_home(request):
 
 	desideri = Desiderio.objects.filter(
 		data_inizio__lte = now, 
-		data_fine__gte = now
+		data_fine__gte = now,
+		sku__gte=1
 	).extra(select={'punti_piuma': "costo_riscatto/0.001"}).values(
 		"id", 
 		"nome",
@@ -46,9 +47,8 @@ class desideri_id(View):
 		return JsonResponse(desiderio_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "negro"
+		user = request.user
+		username = user.username
 		utente = Utente.objects.get(username = username)		
 
 		d = Desiderio.objects.get(pk = id)

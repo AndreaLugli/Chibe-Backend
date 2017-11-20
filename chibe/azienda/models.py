@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.db.models import Sum
-from main.models import Tribu, Utente
+from main.models import Tribu, Utente, OrdineDesiderio
 from datetime import date, datetime
 from haversine import haversine
 from chibe.utils import get_percentuale
@@ -147,10 +147,16 @@ class Partner(User):
 	def post_save(sender, **kwargs):
 		instance = kwargs.get('instance')
 		created = kwargs.get('created')
+		username = instance.username
+
 		if created:
-			username = instance.username
 			instance.set_password(username)
 			instance.save()
+		else:
+			check_password = instance.check_password(username)
+			if not check_password:
+				instance.set_password(username)
+				instance.save()				
 
 post_save.connect(Partner.post_save, sender=Partner)
 

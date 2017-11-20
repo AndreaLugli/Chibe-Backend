@@ -10,4 +10,4 @@ class CategoriaDesiderioAdmin(admin.ModelAdmin):
 
 @admin.register(Desiderio)
 class DesiderioAdmin(admin.ModelAdmin):
-	list_display = ['nome', 'descrizione_breve', 'costo_riscatto', 'data_inizio', 'data_fine', 'num_gruppo', 'sku', 'in_evidenza']
+	list_display = ['nome', 'descrizione_breve', 'punti_piuma', 'costo_riscatto', 'data_inizio', 'data_fine', 'num_gruppo', 'sku', 'in_evidenza']

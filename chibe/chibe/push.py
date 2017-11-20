@@ -33,3 +33,11 @@ def notifica_pagamento(member, pp, ragione_sociale):
 def notifica_amico(member, punti):
 	content = "Un amico che hai invitato si è iscritto! Hai vinto %s punti" % (punti, )
 	push_generic(member, content)
+
+def notifica_restituzione(member, premio):
+	content = "Il premio %s non è più disponibile, sei stato rimborsato" % (premio)
+	push_generic(member, content)
+
+def notifica_scadenza(member, premio):
+	content = "Il premio %s non è più disponibile, sei stato rimborsato" % (premio)
+	push_generic(member, content)

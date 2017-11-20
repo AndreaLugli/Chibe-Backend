@@ -17,6 +17,7 @@ from .models import Utente, OnBoard, Tribu, ResetPassword
 from .models import Provincia, Scuola
 from .models import Gruppo, PuntiGruppo, OrdineDesiderio
 from .models import PushNotification
+from .tasks import check_sku_groups
 from social_django.models import UserSocialAuth
 from django.conf import settings
 import StringIO
@@ -456,9 +457,8 @@ def utente_amico_delete(request):
 
 @csrf_exempt
 def utente_info(request):
-	#user = request.user
-	#username = user.username
-	username = "negro"
+	user = request.user
+	username = user.username
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -525,9 +525,8 @@ def utente_modifica(request):
 
 @csrf_exempt
 def utente_desideri(request):
-	#user = request.user
-	#username = user.username
-	username = "negro"
+	user = request.user
+	username = user.username
 	utente = Utente.objects.get(username = username)
 
 	gruppi = Gruppo.objects.filter(utenti = utente)
@@ -602,9 +601,8 @@ class utente_gruppo(View):
 		return super(utente_gruppo, self).dispatch(*args, **kwargs)
 
 	def get(self, request, id, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "negro"
+		user = request.user
+		username = user.username
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.select_related('desiderio').get(pk = id)
@@ -651,9 +649,8 @@ class utente_gruppo(View):
 		return JsonResponse(gruppo_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "negro"
+		user = request.user
+		username = user.username
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -681,18 +678,33 @@ class utente_gruppo_riscatta(View):
 		return super(utente_gruppo_riscatta, self).dispatch(*args, **kwargs)
 
 	def post(self, request, id, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "negro"
+		user = request.user
+		username = user.username
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
+		desiderio = gruppo.desiderio
+		current_sku = desiderio.sku
 
-		ordine_ex = OrdineDesiderio.objects.filter(gruppo = gruppo).exists()
+		if current_sku > 0:		
+			ordine_ex = OrdineDesiderio.objects.filter(gruppo = gruppo).exists()
 
-		if not ordine_ex:
-			token = generate_code_ordine()
-			OrdineDesiderio.objects.create(gruppo = gruppo, token = token)
+			if not ordine_ex:
+				token = generate_code_ordine()
+				OrdineDesiderio.objects.create(gruppo = gruppo, token = token)
+
+			#abbassa la SKU
+			new_sku = current_sku - 1
+			desiderio.sku = new_sku
+			desiderio.save()
+
+			#controlla gli altri seguitori
+			if new_sku == 0:
+				#check_sku_groups(gruppo.id, desiderio)
+				check_sku_groups.delay(gruppo.id, desiderio)
+
+		else:
+			print "Fai qualcosa"
 
 		return HttpResponse()
 
@@ -703,9 +715,8 @@ class utente_gruppo_utenti(View):
 		return super(utente_gruppo_utenti, self).dispatch(*args, **kwargs)
 
 	def get(self, request, id, *args, **kwargs):	
-		#user = request.user
-		#username = user.username
-		username = "negro"
+		user = request.user
+		username = user.username
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)
@@ -741,9 +752,8 @@ class utente_gruppo_utenti(View):
 		return JsonResponse(gruppo_json, safe = False)
 
 	def post(self, request, id, *args, **kwargs):
-		#user = request.user
-		#username = user.username
-		username = "negro"
+		user = request.user
+		username = user.username
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)

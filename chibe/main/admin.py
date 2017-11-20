@@ -43,11 +43,14 @@ class GruppoAdmin(admin.ModelAdmin):
 
 @admin.register(PuntiGruppo)
 class PuntiGruppoAdmin(admin.ModelAdmin):
-	pass
+	list_display = ['gruppo', 'utente', 'punti']
 
 @admin.register(OrdineDesiderio)
 class OrdineDesiderioAdmin(admin.ModelAdmin):
-	pass
+	list_display = ['gruppo', 'admin', 'timestamp', 'token', 'ritirato', 'partner_ritirato', 'timestamp_ritiro']
+
+	def admin(self, obj):
+		return obj.gruppo.utente_admin.email
 
 @admin.register(PushNotification)
 class PushNotificationAdmin(admin.ModelAdmin):

@@ -96,6 +96,9 @@ class Gruppo(models.Model):
 		else:
 			return False
 
+	def __unicode__(self):
+		return str(self.id)
+
 	class Meta:
 		verbose_name = "Gruppo"
 		verbose_name_plural = "Gruppi"	

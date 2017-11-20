@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.views.generic import View
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
@@ -9,10 +9,13 @@ from django.utils.decorators import method_decorator
 from django.core import serializers
 from chibe.push import notifica_pagamento
 from chibe.utils import get_percentuale
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from azienda.models import Partner, Categoria, Acquisto, ContrattoMarketing
-from main.models import Tribu, Utente
+from main.models import Tribu, Utente, OrdineDesiderio
+
+import logging
+logger = logging.getLogger('django.request')
 
 def azienda_index(request):
 	return HttpResponse()
@@ -24,6 +27,8 @@ class azienda_login(View):
 
 	def post(self, request, *args, **kwargs):
 		imei = request.POST.get("imei", None)
+
+		logger.debug(request.POST)
 
 		user = authenticate(request, username=imei, password=imei)
 
@@ -63,6 +68,69 @@ class azienda_categorie(View):
 		data = serializers.serialize('json', categorie, fields=('id', 'nome','id_immagine'))
 
 		return HttpResponse(data)
+
+class azienda_fornitore(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(azienda_fornitore, self).dispatch(*args, **kwargs)
+
+	def get(self, request, *args, **kwargs):
+		user = request.user
+		username = user.username
+		partner = Partner.objects.get(username = username)
+		is_fornitore = partner.is_fornitore
+
+		if is_fornitore:
+			return HttpResponse()
+		else:
+			return HttpResponseBadRequest()
+
+class azienda_premio(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(azienda_premio, self).dispatch(*args, **kwargs)
+
+	def post(self, request, *args, **kwargs):
+		user = request.user
+		username = user.username
+		partner = Partner.objects.get(username = username)
+		token = request.POST['token']
+		token = token.replace(" ", "").strip()
+
+		ordine_ex = OrdineDesiderio.objects.filter(token = token).exists()
+
+		if ordine_ex:
+			ordine_obj = OrdineDesiderio.objects.get(token = token)
+			ritirato = ordine_obj.ritirato
+
+			if ritirato:
+				return HttpResponseBadRequest("Premio già ritirato")
+			else:
+				desiderio = ordine_obj.gruppo.desiderio
+				partners = desiderio.partners.all()
+
+				if partner in partners:
+					now = datetime.now()
+					ordine_obj.ritirato = True
+					ordine_obj.timestamp_ritiro = now
+					ordine_obj.partner_ritirato = partner
+					ordine_obj.save()
+
+					desiderio_json = {
+						"id" : desiderio.id,
+						"nome" : desiderio.nome,
+						"descrizione_lunga" : desiderio.descrizione_lunga,
+						"immagine" : desiderio.immagine,
+						"num_gruppo" : desiderio.num_gruppo,
+						"punti_piuma" : desiderio.punti_piuma()
+					}
+
+					return JsonResponse(desiderio_json, safe = False)
+				else:
+					return HttpResponseBadRequest("Premio non disponibile nell'attività")
+		else:
+			return HttpResponseBadRequest("Codice errato")
+
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -195,7 +263,6 @@ class azienda_id(View):
 		}
 
 		return JsonResponse(json_su)
-
 
 class azienda_pagamento(View):
 	@method_decorator(csrf_exempt)
