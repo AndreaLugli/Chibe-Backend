@@ -23,7 +23,10 @@ class Desiderio(models.Model):
 	costo_listino = models.DecimalField(max_digits=10, decimal_places=2)
 	costo_riscatto = models.DecimalField(max_digits=10, decimal_places=2)
 
-	immagine = models.CharField(max_length = 300, blank = True, null = True)
+	#immagine = models.CharField(max_length = 300, blank = True, null = True)
+	immagine = models.ImageField(blank = True, null = True, upload_to="desideri/")
+	immagine.help_text = "La dimensione deve essere 400x400 pixel"
+
 	categoria = models.ForeignKey(CategoriaDesiderio)
 	data_inizio = models.DateField()
 	data_fine = models.DateField()

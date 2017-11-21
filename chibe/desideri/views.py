@@ -39,7 +39,7 @@ class desideri_id(View):
 			"id" : d.id,
 			"nome" : d.nome,
 			"descrizione_lunga" : d.descrizione_lunga,
-			"immagine" : d.immagine,
+			"immagine" : str(d.immagine),
 			"num_gruppo" : d.num_gruppo,
 			"punti_piuma" : d.punti_piuma()
 		}

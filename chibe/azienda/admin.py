@@ -7,7 +7,7 @@ from .models import Partner, Categoria, ContrattoMarketing, Acquisto
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
 	list_display = ['ragione_sociale', "email", "attivo", 'is_fornitore', "categoria_partner", "tribu", "orsi", "aquile", "lupi", "puma", "volpi"]
-	fields = ["username", "first_name", "last_name", "email", "attivo", "categoria_partner", "ragione_sociale", "codice_fiscale", "partita_iva", "indirizzo", "latitudine", "longitudine", "telefono_fisso", "telefono_cellulare", "descrizione", "categorie", "is_fornitore", "tribu", "orsi", "aquile", "lupi", "puma", "volpi"]
+	fields = ["foto", "username", "first_name", "last_name", "email", "attivo", "categoria_partner", "ragione_sociale", "codice_fiscale", "partita_iva", "indirizzo", "latitudine", "longitudine", "telefono_fisso", "telefono_cellulare", "descrizione", "categorie", "is_fornitore", "tribu", "orsi", "aquile", "lupi", "puma", "volpi"]
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):

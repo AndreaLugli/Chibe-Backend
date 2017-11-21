@@ -124,7 +124,9 @@ class Partner(User):
 	categoria_partner = models.CharField(max_length = 3, choices = CATEGORIA_PARTNER, blank = True, null = True)	
 
 	categorie = models.ManyToManyField(Categoria)
-	foto = models.ImageField(blank = True, null = True)
+	foto = models.ImageField(blank = True, null = True, upload_to="aziende/")
+	foto.help_text = "La dimensione deve essere 400x100 pixel"
+
 	attivo = models.BooleanField(default = True) 
 
 	is_fornitore = models.BooleanField(default = False)
