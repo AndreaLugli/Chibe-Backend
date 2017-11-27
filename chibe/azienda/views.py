@@ -11,7 +11,7 @@ from chibe.push import notifica_pagamento
 from chibe.utils import get_percentuale
 from datetime import timedelta, datetime
 from django.utils import timezone
-from azienda.models import Partner, Categoria, Acquisto, ContrattoMarketing
+from azienda.models import Partner, Categoria, Acquisto
 from main.models import Tribu, Utente, OrdineDesiderio
 
 import logging
@@ -38,10 +38,8 @@ class azienda_login(View):
 
 			attivo = partner.attivo
 			if attivo:
-				esistono_contratti = ContrattoMarketing.objects.filter(partners = partner).exists()
-				if esistono_contratti:
-
-					contratto = ContrattoMarketing.objects.get(partners = partner)
+				contratto = partner.contratto
+				if contratto:
 					is_valid_contract = contratto.is_valid()
 					if is_valid_contract:
 						login(request, user)
@@ -237,7 +235,7 @@ class azienda_id(View):
 
 		su = Partner.objects.get(id = id)
 
-		contratto = ContrattoMarketing.objects.get(partners = su)
+		contratto = su.contratto
 		percentuale_marketing = contratto.percentuale_marketing	
 
 		percentuale = get_percentuale(percentuale_marketing)
@@ -344,7 +342,7 @@ def calcolo_punti(partner, acquisto):
 
 	tribu_partner = partner.tribu
 
-	contratto = ContrattoMarketing.objects.get(partners = partner)
+	contratto = partner.contratto
 	Pe = contratto.percentuale_marketing
 	Pe = (Pe/100)
 

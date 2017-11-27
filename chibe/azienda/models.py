@@ -9,6 +9,38 @@ from datetime import date, datetime
 from haversine import haversine
 from chibe.utils import get_percentuale
 
+class ContrattoMarketing(models.Model):
+	#partners = models.ManyToManyField(Partner)
+	percentuale_marketing = models.FloatField(default = 0)
+
+	inizio = models.DateField()
+	fine = models.DateField()
+	tacito_rinnovo = models.BooleanField(default = True)
+
+	PERIODO_FATTURAZIONE = (
+		("15", "15 giorni"),
+		("30", "30 giorni"),
+		("60", "60 giorni"),
+		("90", "90 giorni"),
+	)
+
+	fatturazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
+	documentazione_traffico_acquisti = models.BooleanField(default = True)
+	periodo_documentazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
+
+	def is_valid(self):
+		fine = self.fine
+		today = date.today()
+
+		return today < fine
+
+	def __unicode__(self):
+		return str(self.id)
+
+	class Meta:
+		verbose_name = "Contratto Marketing"
+		verbose_name_plural = "2. Contratto Marketing"
+
 class Categoria(models.Model):
 	nome = models.CharField(max_length = 300)
 	id_immagine = models.CharField(max_length = 300)
@@ -33,64 +65,64 @@ class SearchQueryset(models.query.QuerySet):
 		now = datetime.now().date()
 
 		for su in self:
-
-			esiste_contratto = ContrattoMarketing.objects.filter(inizio__lte = now, fine__gte = now, partners = su).exists()
+			contratto = su.contratto
 			attivo = su.attivo
-			if esiste_contratto and attivo:
-				point = (su.latitudine, su.longitudine)
-				distanza = haversine(center_point, point)
+			if contratto and attivo:
 
-				contratto = ContrattoMarketing.objects.get(inizio__lte = now, fine__gte = now, partners = su)
-				percentuale_marketing = contratto.percentuale_marketing
-				percentuale = get_percentuale(percentuale_marketing)
+				is_valido = contratto.is_valid()
+				if is_valido:
+					point = (su.latitudine, su.longitudine)
+					distanza = haversine(center_point, point)
 
-				if isinstance(percentuale, basestring):
-					percentuale_val = percentuale.replace('+', "")
-					percentuale_val = int(percentuale_val)
-				else:
-					percentuale_val = percentuale
+					percentuale_marketing = contratto.percentuale_marketing
+					percentuale = get_percentuale(percentuale_marketing)
 
-				if distanza < limite:
+					if isinstance(percentuale, basestring):
+						percentuale_val = percentuale.replace('+', "")
+						percentuale_val = int(percentuale_val)
+					else:
+						percentuale_val = percentuale
 
-					importo = Acquisto.objects.filter(partner = su).aggregate(Sum('importo'))
+					if distanza < limite:
 
+						importo = Acquisto.objects.filter(partner = su).aggregate(Sum('importo'))
 
-					orsi = su.orsi
-					aquile = su.aquile
-					lupi = su.lupi
-					puma = su.puma
-					volpi = su.volpi
-					tribu = su.tribu
-					tribu_val = None
-					if tribu:
-						tribu_val = tribu.nome
+						orsi = su.orsi
+						aquile = su.aquile
+						lupi = su.lupi
+						puma = su.puma
+						volpi = su.volpi
+						tribu = su.tribu
+						tribu_val = None
+						if tribu:
+							tribu_val = tribu.nome
 
-					categoria_partner_val = ""
-					if su.categoria_partner:
-						categoria_partner_val = su.categoria_partner
+						categoria_partner_val = ""
+						if su.categoria_partner:
+							categoria_partner_val = su.categoria_partner
 
-					json_su = {
-						"id" : su.id,
-						"foto" : str(su.foto),
-						"descrizione" : su.descrizione,
-						"telefono" : su.telefono_fisso,
-						"ragione_sociale" : su.ragione_sociale,
-						"indirizzo" : su.indirizzo,
-						"distanza" : distanza,
-						"orsi" : orsi,
-						"aquile" : aquile,
-						"lupi" : lupi,
-						"puma" : puma,
-						"volpi" : volpi,
-						"tribu" : tribu_val,
-						"percentuale" : percentuale,
-						"percentuale_val" : percentuale_val,
-						"date_joined" : su.date_joined,
-						"importo" : importo['importo__sum'],
-						"categoria_partner" : categoria_partner_val
-					}
+						json_su = {
+							"id" : su.id,
+							"foto" : str(su.foto),
+							"descrizione" : su.descrizione,
+							"telefono" : su.telefono_fisso,
+							"ragione_sociale" : su.ragione_sociale,
+							"indirizzo" : su.indirizzo,
+							"distanza" : distanza,
+							"orsi" : orsi,
+							"aquile" : aquile,
+							"lupi" : lupi,
+							"puma" : puma,
+							"volpi" : volpi,
+							"tribu" : tribu_val,
+							"percentuale" : percentuale,
+							"percentuale_val" : percentuale_val,
+							"date_joined" : su.date_joined,
+							"importo" : importo['importo__sum'],
+							"categoria_partner" : categoria_partner_val
+						}
 
-					result_list.append(json_su)
+						result_list.append(json_su)
 
 		return result_list
 
@@ -112,6 +144,7 @@ class Partner(User):
 	telefono_fisso = models.CharField(max_length = 300, blank = True, null = True)
 	telefono_cellulare = models.CharField(max_length = 300, blank = True, null = True)
 	descrizione = models.TextField(blank = True, null = True)
+	contratto = models.ForeignKey(ContrattoMarketing, blank = True, null = True)
 
 	CATEGORIA_PARTNER = (
 		("RIS", "Ristoranti"),
@@ -187,32 +220,5 @@ class Acquisto(models.Model):
 		verbose_name = "Acquisto"
 		verbose_name_plural = "3. Acquisti"
 
-class ContrattoMarketing(models.Model):
-	partners = models.ManyToManyField(Partner)
-	percentuale_marketing = models.FloatField(default = 0)
 
-	inizio = models.DateField()
-	fine = models.DateField()
-	tacito_rinnovo = models.BooleanField(default = True)
-
-	PERIODO_FATTURAZIONE = (
-		("15", "15 giorni"),
-		("30", "30 giorni"),
-		("60", "60 giorni"),
-		("90", "90 giorni"),
-	)
-
-	fatturazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
-	documentazione_traffico_acquisti = models.BooleanField(default = True)
-	periodo_documentazione = models.CharField(max_length = 3, choices = PERIODO_FATTURAZIONE, default = "15")	
-
-	def is_valid(self):
-		fine = self.fine
-		today = date.today()
-
-		return today < fine
-
-	class Meta:
-		verbose_name = "Contratto Marketing"
-		verbose_name_plural = "2. Contratto Marketing"
 
