@@ -10,7 +10,6 @@ from haversine import haversine
 from chibe.utils import get_percentuale
 
 class ContrattoMarketing(models.Model):
-	#partners = models.ManyToManyField(Partner)
 	percentuale_marketing = models.FloatField(default = 0)
 
 	inizio = models.DateField()
@@ -135,15 +134,15 @@ class PartneroManager(models.Manager):
 
 class Partner(User):
 	objects_search = PartneroManager()
-	ragione_sociale = models.CharField(max_length = 300, blank = True, null = True)
-	codice_fiscale = models.CharField(max_length = 300, blank = True, null = True)
-	partita_iva = models.CharField(max_length = 300, blank = True, null = True)
-	indirizzo = models.CharField(max_length = 300, blank = True, null = True)
-	latitudine = models.FloatField(blank = True, null = True)
-	longitudine = models.FloatField(blank = True, null = True)
-	telefono_fisso = models.CharField(max_length = 300, blank = True, null = True)
-	telefono_cellulare = models.CharField(max_length = 300, blank = True, null = True)
-	descrizione = models.TextField(blank = True, null = True)
+	ragione_sociale = models.CharField(max_length = 300)
+	codice_fiscale = models.CharField(max_length = 300)
+	partita_iva = models.CharField(max_length = 300)
+	indirizzo = models.CharField(max_length = 300)
+	latitudine = models.FloatField()
+	longitudine = models.FloatField()
+	telefono_fisso = models.CharField(max_length = 300, )
+	telefono_cellulare = models.CharField(max_length = 300, )
+	descrizione = models.TextField()
 	contratto = models.ForeignKey(ContrattoMarketing, blank = True, null = True)
 
 	CATEGORIA_PARTNER = (
@@ -157,7 +156,7 @@ class Partner(User):
 	categoria_partner = models.CharField(max_length = 3, choices = CATEGORIA_PARTNER, blank = True, null = True)	
 
 	categorie = models.ManyToManyField(Categoria)
-	foto = models.ImageField(blank = True, null = True, upload_to="aziende/")
+	foto = models.ImageField(upload_to="aziende/")
 	foto.help_text = "La dimensione deve essere 400x100 pixel"
 
 	attivo = models.BooleanField(default = True) 

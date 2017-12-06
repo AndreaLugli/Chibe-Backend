@@ -416,7 +416,7 @@ def search_amico(request):
 		Q(username__icontains=amico) |
 		Q(telefono_cellulare__icontains=amico) |
 		Q(codice__icontains=amico)
-	).exclude(username = username).exclude(pk__in=amici).values("username", "id", "first_name", "last_name")
+	).exclude(username = username).exclude(pk__in=amici).values("username", "id", "first_name", "last_name", "avatar")
 
 	return JsonResponse(list(utenti), safe = False)
 
@@ -628,6 +628,12 @@ class utente_gruppo(View):
 			codice_ordine = ordine_obj.token
 			ritirato = ordine_obj.ritirato
 
+		punti_necessari = float(gruppo.desiderio.costo_riscatto) / 0.001;
+		punti = float(gruppo.punti)
+	
+		percentuale = int((punti / punti_necessari) * 100)
+		percentuale = str(percentuale) + "%"			
+
 		gruppo_json = {
 			"id" : gruppo.id,
 			"punti" : gruppo.punti,
@@ -641,7 +647,8 @@ class utente_gruppo(View):
 			"ordine_riscattato" : ordine_riscattato,
 			"codice_ordine" : codice_ordine,
 			"partners" : partners,
-			"ritirato" : ritirato
+			"ritirato" : ritirato,
+			"percentuale" : percentuale
 		}
 
 		list_gruppi.append(gruppo_json)
@@ -732,8 +739,8 @@ class utente_gruppo_utenti(View):
 		amici_miei = utente.amici.all()
 		amici_nogruppo = amici_miei.exclude(pk__in = utenti_gruppo)
 
-		utenti_gruppo = utenti_gruppo.values("id", "username", "first_name", "last_name")
-		amici_nogruppo = amici_nogruppo.values("id", "username", "first_name", "last_name")
+		utenti_gruppo = utenti_gruppo.values("id", "username", "first_name", "last_name", "avatar")
+		amici_nogruppo = amici_nogruppo.values("id", "username", "first_name", "last_name", "avatar")
 
 		gruppo_json = {
 			"io" : utente.id,
