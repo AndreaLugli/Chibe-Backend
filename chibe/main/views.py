@@ -459,6 +459,7 @@ def utente_amico_delete(request):
 def utente_info(request):
 	user = request.user
 	username = user.username
+
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -648,7 +649,8 @@ class utente_gruppo(View):
 			"codice_ordine" : codice_ordine,
 			"partners" : partners,
 			"ritirato" : ritirato,
-			"percentuale" : percentuale
+			"percentuale" : percentuale,
+			"descrizione" : gruppo.desiderio.descrizione_breve
 		}
 
 		list_gruppi.append(gruppo_json)

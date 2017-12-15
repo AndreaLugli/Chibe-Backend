@@ -102,7 +102,8 @@ class SearchQueryset(models.query.QuerySet):
 
 						json_su = {
 							"id" : su.id,
-							"foto" : str(su.foto),
+							"banner" : str(su.banner),
+							"logo" : str(su.logo),
 							"descrizione" : su.descrizione,
 							"telefono" : su.telefono_fisso,
 							"ragione_sociale" : su.ragione_sociale,
@@ -156,8 +157,13 @@ class Partner(User):
 	categoria_partner = models.CharField(max_length = 3, choices = CATEGORIA_PARTNER, blank = True, null = True)	
 
 	categorie = models.ManyToManyField(Categoria)
-	foto = models.ImageField(upload_to="aziende/")
-	foto.help_text = "La dimensione deve essere 400x100 pixel"
+
+
+	logo = models.ImageField(upload_to="aziende/")
+	logo.help_text = "La dimensione deve essere 400x400 pixel"
+
+	banner = models.ImageField(upload_to="aziende/")
+	banner.help_text = "La dimensione deve essere 400x100 pixel"
 
 	attivo = models.BooleanField(default = True) 
 

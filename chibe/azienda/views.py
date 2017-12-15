@@ -118,7 +118,7 @@ class azienda_premio(View):
 						"id" : desiderio.id,
 						"nome" : desiderio.nome,
 						"descrizione_lunga" : desiderio.descrizione_lunga,
-						"immagine" : desiderio.immagine,
+						"immagine" : str(desiderio.immagine),
 						"num_gruppo" : desiderio.num_gruppo,
 						"punti_piuma" : desiderio.punti_piuma()
 					}
@@ -249,7 +249,8 @@ class azienda_id(View):
 
 		json_su = {
 			"id" : su.id,
-			"foto" : str(su.foto),
+			"logo" : str(su.logo),
+			"banner" : str(su.banner),
 			"descrizione" : su.descrizione,
 			"telefono" : su.telefono_fisso,
 			"ragione_sociale" : su.ragione_sociale,
