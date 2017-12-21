@@ -15,7 +15,7 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 @admin.register(ContrattoMarketing)
 class ContrattoMarketingAdmin(admin.ModelAdmin):
-	list_display = ['id', 'percentuale_marketing', 'inizio', 'fine', 'tacito_rinnovo', 'fatturazione', 'documentazione_traffico_acquisti', 'periodo_documentazione']
+	list_display = ['etichetta', 'id', 'percentuale_marketing', 'inizio', 'fine', 'tacito_rinnovo', 'fatturazione', 'documentazione_traffico_acquisti', 'periodo_documentazione']
 
 @admin.register(Acquisto)
 class AcquistoAdmin(admin.ModelAdmin):

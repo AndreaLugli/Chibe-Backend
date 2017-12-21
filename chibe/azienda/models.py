@@ -10,6 +10,8 @@ from haversine import haversine
 from chibe.utils import get_percentuale
 
 class ContrattoMarketing(models.Model):
+	etichetta = models.CharField(blank = True, null = True, max_length=200)
+
 	percentuale_marketing = models.FloatField(default = 0)
 
 	inizio = models.DateField()
@@ -34,7 +36,11 @@ class ContrattoMarketing(models.Model):
 		return today < fine
 
 	def __unicode__(self):
-		return str(self.id)
+		etichetta = self.etichetta
+		if etichetta:
+			return etichetta
+		else:
+			return str(self.id)
 
 	class Meta:
 		verbose_name = "Contratto Marketing"

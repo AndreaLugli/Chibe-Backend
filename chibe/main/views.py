@@ -396,6 +396,7 @@ def upload_picture(request):
 def get_code(request):
 	user = request.user
 	username = user.username
+	
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
 	return HttpResponse(codice)
@@ -459,7 +460,6 @@ def utente_amico_delete(request):
 def utente_info(request):
 	user = request.user
 	username = user.username
-
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None

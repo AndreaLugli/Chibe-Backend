@@ -27,6 +27,9 @@ class Desiderio(models.Model):
 	immagine = models.ImageField(blank = True, null = True, upload_to="desideri/")
 	immagine.help_text = "La dimensione deve essere 400x100 pixel"
 
+	big_picture = models.ImageField(blank = True, null = True, upload_to="desideri/")
+	big_picture.help_text = "La dimensione deve essere 400x400 pixel"
+
 	categoria = models.ForeignKey(CategoriaDesiderio)
 	data_inizio = models.DateField()
 	data_fine = models.DateField()

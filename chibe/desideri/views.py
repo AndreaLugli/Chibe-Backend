@@ -23,7 +23,8 @@ def desideri_home(request):
 		"in_evidenza", 
 		"num_gruppo", 
 		"punti_piuma",
-		"immagine"
+		"immagine",
+		"big_picture"
 	)
 
 	return JsonResponse(list(desideri), safe = False)
