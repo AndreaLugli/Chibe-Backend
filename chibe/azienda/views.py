@@ -168,6 +168,9 @@ class azienda_search(View):
 
 		page = request.GET.get("page")
 
+		if page == "null":
+			page = 1
+
 		try:
 			partners_list = paginator.page(page)
 		except PageNotAnInteger:

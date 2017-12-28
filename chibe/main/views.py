@@ -27,6 +27,7 @@ import hashlib
 import wget
 
 AVATAR_MEDIA_ROOT = settings.MEDIA_ROOT + "/avatar"
+PUNTI_BONUS = 100
 
 def check_connected(request):
 	if request.user.is_authenticated():
@@ -805,23 +806,54 @@ from social_core.backends.google import GooglePlusAuth
 from social_core.utils import handle_http_errors
 from google.oauth2 import id_token
 from google.auth.transport import requests
+import requests as requests2
 
 CLIENT_ID = settings.SOCIAL_AUTH_GOOGLE_PLUS_KEY
 
 class CustomGooglePlusAuth(GooglePlusAuth):
+
+	DEFAULT_SCOPE = [
+		'https://www.googleapis.com/auth/plus.login',
+		'https://www.googleapis.com/auth/plus.me',
+		'email'
+	]
+
 	def user_data(self, access_token, *args, **kwargs):
 		idinfo = id_token.verify_oauth2_token(access_token, requests.Request(), CLIENT_ID)
 		if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
 			raise ValueError('Wrong issuer.')
 		return idinfo
 
-
 	@handle_http_errors
 	def do_auth(self, access_token, *args, **kwargs):
 		"""Finish the auth process once the access_token was retrieved"""
-		data = self.user_data(access_token, *args, **kwargs)
+		res = kwargs.get('response')
+		id_token = res['id_token']
+		account_details = False
+		try:
+			data = self.user_data(access_token, *args, **kwargs)
+		except:
+			data = self.user_data(id_token, *args, **kwargs)
+			account_details_request = requests2.get('https://www.googleapis.com/plus/v1/people/me?access_token=' + access_token)
+			account_details = account_details_request.json()	
+
 		response = kwargs.get('response') or {}
 		response.update(data or {})
+		if account_details:
+			name = account_details['name']
+			givenName = name['givenName']
+			familyName = name['familyName']
+
+			image = account_details['image']
+			picture = image['url']
+
+			response['family_name'] = familyName
+			response['given_name'] = givenName
+			response['picture'] = picture
+			#given_name
+			#family_name
+			#picture
+
 		if 'access_token' not in response:
 			response['access_token'] = access_token
 		kwargs.update({'response': response, 'backend': self})
@@ -860,6 +892,7 @@ def register_by_access_token(request, backend):
 		return JsonResponse(json_output)
 
 def register_social(backend, user, response, strategy, *args, **kwargs):
+
 	backend_name = backend.name
 	if backend_name == "google-plus":
 		email = response['email']
@@ -906,6 +939,25 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 	member.__dict__.update(user.__dict__)
 	member.save()
 
+	if not member_exists:
+		user_code = strategy.session_get('user_code')
+		if user_code:
+			#Punti al nuovo		
+			pp_nuovo = PUNTI_BONUS
+			utente_obj_punti_vecchi = member.punti
+			member.punti = utente_obj_punti_vecchi + pp_nuovo 
+			member.save()
+
+			#Punti al vecchio
+			utente = get_object_or_404(Utente, codice=user_code)
+
+			pp_vecchio = PUNTI_BONUS
+			utente_punti_vecchi = utente.punti
+			utente.punti = utente_punti_vecchi + pp_vecchio
+			utente.save()
+
+			notifica_amico(utente, pp_nuovo)
+
 
 class utente_invito(View):
 	def dispatch(self, *args, **kwargs):
@@ -915,7 +967,9 @@ class utente_invito(View):
 		utente = get_object_or_404(Utente, codice=token)
 
 		args = {
-			"utente" : utente
+			"utente" : utente,
+			"token" : token,
+			"CLIENT_ID": CLIENT_ID
 		}
 
 		template_name = "utente_invito.html"
@@ -964,13 +1018,13 @@ class utente_invito(View):
 		OnBoard.objects.create(utente = utente_obj)
 
 		#Punti al nuovo		
-		pp_nuovo = 10
+		pp_nuovo = PUNTI_BONUS
 		utente_obj_punti_vecchi = utente_obj.punti
 		utente_obj.punti = utente_obj_punti_vecchi + pp_nuovo 
 		utente_obj.save()
 
 		#Punti al vecchio
-		pp_vecchio = 10
+		pp_vecchio = PUNTI_BONUS
 		utente_punti_vecchi = utente.punti
 		utente.punti = utente_punti_vecchi + pp_vecchio
 		utente.save()
@@ -979,11 +1033,21 @@ class utente_invito(View):
 
 		args = {
 			"success" : True,
-			"punti" : pp_nuovo
+			"punti" : PUNTI_BONUS
 		}
 
 		template_name = "utente_invito.html"
 		return render(request, template_name, args)
+
+def successo_invito(request):
+	args = {
+		"success" : True,
+		"punti" : PUNTI_BONUS
+	}
+
+	template_name = "utente_invito.html"
+	return render(request, template_name, args)
+
 
 def utente_invitecode(request):
 	user = request.user

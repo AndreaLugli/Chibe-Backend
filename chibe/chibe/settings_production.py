@@ -1,7 +1,7 @@
 import os 
 
 IS_LOCAL = False
-DEBUG = False
+DEBUG = True
 IS_DEBUG = False
 CORS_ORIGIN_ALLOW_ALL = True
 
