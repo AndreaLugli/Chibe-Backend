@@ -651,7 +651,8 @@ class utente_gruppo(View):
 			"partners" : partners,
 			"ritirato" : ritirato,
 			"percentuale" : percentuale,
-			"descrizione" : gruppo.desiderio.descrizione_breve
+			"descrizione" : gruppo.desiderio.descrizione_breve,
+			"immagine" : str(gruppo.desiderio.immagine),
 		}
 
 		list_gruppi.append(gruppo_json)

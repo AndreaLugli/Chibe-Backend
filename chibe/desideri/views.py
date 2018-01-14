@@ -12,11 +12,13 @@ from main.models import Gruppo, Utente
 def desideri_home(request):
 	now = datetime.now().date()
 
-	desideri = Desiderio.objects.filter(
+	all_desideri = Desiderio.objects.filter(
 		data_inizio__lte = now, 
 		data_fine__gte = now,
 		sku__gte=1
-	).extra(select={'punti_piuma': "costo_riscatto/0.001"}).values(
+	)
+
+	desideri_premium = all_desideri.filter(in_evidenza = True).extra(select={'punti_piuma': "costo_riscatto/0.001"}).values(
 		"id", 
 		"nome",
 		"descrizione_breve", 
@@ -24,10 +26,40 @@ def desideri_home(request):
 		"num_gruppo", 
 		"punti_piuma",
 		"immagine",
-		"big_picture"
+		"big_picture",
+		"in_evidenza"
 	)
 
-	return JsonResponse(list(desideri), safe = False)
+	desideri_normali = all_desideri.filter(in_evidenza = False).extra(select={'punti_piuma': "costo_riscatto/0.001"}).values(
+		"id", 
+		"nome",
+		"descrizione_breve", 
+		"in_evidenza", 
+		"num_gruppo", 
+		"punti_piuma",
+		"immagine",
+		"big_picture",
+		"in_evidenza"
+	)
+
+	desideri = list(desideri_premium) + list(desideri_normali)
+
+	# desideri = Desiderio.objects.filter(
+	# 	data_inizio__lte = now, 
+	# 	data_fine__gte = now,
+	# 	sku__gte=1
+	# ).extra(select={'punti_piuma': "costo_riscatto/0.001"}).values(
+	# 	"id", 
+	# 	"nome",
+	# 	"descrizione_breve", 
+	# 	"in_evidenza", 
+	# 	"num_gruppo", 
+	# 	"punti_piuma",
+	# 	"immagine",
+	# 	"big_picture"
+	# )
+
+	return JsonResponse(desideri, safe = False)
 
 class desideri_id(View):
 	@method_decorator(csrf_exempt)

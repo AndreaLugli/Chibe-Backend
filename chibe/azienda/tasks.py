@@ -1,9 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
-from .models import Partner, Acquisto
+from .models import Partner, Acquisto, ContrattoMarketing, Fattura
 from main.models import Tribu
 from datetime import date, datetime, timedelta
 from chibe.push import push_generic
+from django.db.models import Sum
 
 @shared_task
 def salute():
@@ -53,6 +54,48 @@ def check_tribu():
 			p.save()
 			notifica_perdenti(p, old_t)
 			notifica_vincenti(p, t)
+
+
+#To delete?
+@shared_task
+def period_check_15():
+	today = date.today()
+	
+	today = date(today.year, today.month, 15)
+
+	today_day = today.day
+	if today_day == 15:
+		days_15_ago = today - timedelta(days=15)
+
+		contratti = ContrattoMarketing.objects.filter(fatturazione = today_day)
+		for contratto in contratti:
+			is_valid = contratto.is_valid()
+			if is_valid:
+				partners = Partner.objects.filter(contratto = contratto, attivo = True)
+				if partners:
+					for partner in partners:
+						importo_sum = Acquisto.objects.filter(partner = partner, timestamp__lte=today, timestamp__gte=days_15_ago).aggregate(Sum('importo'))['importo__sum']
+
+						Fattura.objects.create(partner = partner, periodo_iniziale = days_15_ago, periodo_finale = today, importo = importo_sum)
+
+
+@shared_task
+def check_fatturazione():
+	today = date.today()
+
+	partners = Partner.objects.select_related("contratto").filter(attivo = True)
+	for p in partners:
+		contratto = p.contratto
+		is_valid = contratto.is_valid()
+		if is_valid:
+			date_fatturazione = contratto.date_fatturazione()
+			print date_fatturazione
+			if today in date_fatturazione:
+				print "YES"
+
+
+
+
 
 
 

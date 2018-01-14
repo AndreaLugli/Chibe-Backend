@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib import admin
 
-from .models import Partner, Categoria, ContrattoMarketing, Acquisto
+from .models import Partner, Categoria, ContrattoMarketing, Acquisto, Fattura
 
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
@@ -21,3 +21,6 @@ class ContrattoMarketingAdmin(admin.ModelAdmin):
 class AcquistoAdmin(admin.ModelAdmin):
 	list_display = ['utente', 'partner', 'importo', 'timestamp']
 
+@admin.register(Fattura)
+class FatturaAdmin(admin.ModelAdmin):
+	list_display = ["partner", "importo", "periodo_iniziale", "periodo_finale"]

@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from main.models import Tribu, Utente, OrdineDesiderio
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from haversine import haversine
 from chibe.utils import get_percentuale
 
@@ -34,6 +34,24 @@ class ContrattoMarketing(models.Model):
 		today = date.today()
 
 		return today < fine
+
+	def date_fatturazione(self):
+		inizio = self.inizio
+		fine = self.fine
+		fatturazione = self.fatturazione
+
+		delta = fine - inizio # timedelta
+
+		list_date = []
+
+		for i in range(delta.days + 1):
+			x = i * int(fatturazione)
+			data = (inizio + timedelta(days=x))
+			if data < fine:
+				list_date.append(data)
+
+		list_date.append(fine)
+		return list_date
 
 	def __unicode__(self):
 		etichetta = self.etichetta
@@ -165,10 +183,10 @@ class Partner(User):
 	categorie = models.ManyToManyField(Categoria)
 
 
-	logo = models.ImageField(upload_to="aziende/")
+	logo = models.ImageField(upload_to="aziende/", blank = True, null = True)
 	logo.help_text = "La dimensione deve essere 400x400 pixel"
 
-	banner = models.ImageField(upload_to="aziende/")
+	banner = models.ImageField(upload_to="aziende/", blank = True, null = True)
 	banner.help_text = "La dimensione deve essere 400x100 pixel"
 
 	attivo = models.BooleanField(default = True) 
@@ -230,6 +248,17 @@ class Acquisto(models.Model):
 	class Meta:
 		verbose_name = "Acquisto"
 		verbose_name_plural = "3. Acquisti"
+
+class Fattura(models.Model):
+	partner = models.ForeignKey(Partner)
+	importo = models.DecimalField(max_digits=10, decimal_places=2, null = True, blank = True)
+	periodo_iniziale = models.DateField()
+	periodo_finale = models.DateField()
+
+	class Meta:
+		verbose_name = "Fattura"
+		verbose_name_plural = "5. Fatture"
+
 
 
 
