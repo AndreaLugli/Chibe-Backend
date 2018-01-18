@@ -59,8 +59,7 @@ class azienda_categorie(View):
 
 	def get(self, request, *args, **kwargs):	
 		user = request.user
-		#username = user.username
-		username = "352701061243090"
+		username = user.username
 		partner = Partner.objects.get(username = username)
 		
 		categorie = partner.categorie.all()
@@ -267,6 +266,7 @@ class azienda_id(View):
 
 		return JsonResponse(json_su)
 
+from django.utils import timezone
 class azienda_pagamento(View):
 	@method_decorator(csrf_exempt)
 	def dispatch(self, *args, **kwargs):
@@ -289,12 +289,26 @@ class azienda_pagamento(View):
 			utente = Utente.objects.get(codice = codice)
 
 		importo = request.POST['importo']
+
+		timestamp = timezone.now()
+
+		ex_ac = Acquisto.objects.filter(
+			categoria = categoria,
+			importo = importo,
+			partner = partner,
+			utente = utente,
+			timestamp = timestamp
+		).exists()
+
+		if ex_ac:
+			return HttpResponse()
 		
 		new_acquisto = Acquisto.objects.create(
 			categoria = categoria,
 			importo = importo,
 			partner = partner,
-			utente = utente
+			utente = utente,
+			timestamp = timestamp
 		)
 
 		pp = calcolo_punti(partner, new_acquisto)

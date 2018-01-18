@@ -241,7 +241,7 @@ class Acquisto(models.Model):
 	importo = models.DecimalField(max_digits=10, decimal_places=2)
 	partner = models.ForeignKey(Partner) 
 	utente = models.ForeignKey(Utente) 
-	timestamp = models.DateTimeField(auto_now_add = True)
+	timestamp = models.DateTimeField()
 	#timestamp.editable=True
 
 	def __unicode__(self):
