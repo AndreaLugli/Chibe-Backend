@@ -22,9 +22,12 @@ INSTALLED_APPS = [
 	'django_celery_results',
 	'django_celery_beat',
 	'social_django',
-	'staff'
+	'staff',
+	'snowpenguin.django.recaptcha2'
 ]
 
+RECAPTCHA_PUBLIC_KEY = '6LdvTEEUAAAAAAeRFNkxinkmyW5v76nzBzpvKC0w'
+RECAPTCHA_PRIVATE_KEY = '6LdvTEEUAAAAAO4INyat5h6ZuOJSAE189JiKkZgS'
 
 AUTHENTICATION_BACKENDS = [
 	'main.views.CustomGooglePlusAuth',
@@ -78,6 +81,7 @@ MIDDLEWARE = [
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	#'chibe.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'chibe.urls'

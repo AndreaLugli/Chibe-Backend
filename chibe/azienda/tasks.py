@@ -5,6 +5,14 @@ from main.models import Tribu
 from datetime import date, datetime, timedelta
 from chibe.push import push_generic
 from django.db.models import Sum
+from django.utils import timezone
+import pytz
+import requests
+import time
+
+FATTURE_CLOUD_API_UID = 113399
+FATTURE_CLOUD_API_KEY = "441a70874e93291e5862776149024105"
+FATTURE_CLOUD_ENDPOINT = "https://api.fattureincloud.it/v1"
 
 @shared_task
 def salute():
@@ -55,30 +63,6 @@ def check_tribu():
 			notifica_perdenti(p, old_t)
 			notifica_vincenti(p, t)
 
-
-#To delete?
-@shared_task
-def period_check_15():
-	today = date.today()
-	
-	today = date(today.year, today.month, 15)
-
-	today_day = today.day
-	if today_day == 15:
-		days_15_ago = today - timedelta(days=15)
-
-		contratti = ContrattoMarketing.objects.filter(fatturazione = today_day)
-		for contratto in contratti:
-			is_valid = contratto.is_valid()
-			if is_valid:
-				partners = Partner.objects.filter(contratto = contratto, attivo = True)
-				if partners:
-					for partner in partners:
-						importo_sum = Acquisto.objects.filter(partner = partner, timestamp__lte=today, timestamp__gte=days_15_ago).aggregate(Sum('importo'))['importo__sum']
-
-						Fattura.objects.create(partner = partner, periodo_iniziale = days_15_ago, periodo_finale = today, importo = importo_sum)
-
-
 @shared_task
 def check_fatturazione():
 	today = date.today()
@@ -89,9 +73,96 @@ def check_fatturazione():
 		is_valid = contratto.is_valid()
 		if is_valid:
 			date_fatturazione = contratto.date_fatturazione()
-			print date_fatturazione
 			if today in date_fatturazione:
-				print "YES"
+				index_today = date_fatturazione.index(today)
+				if index_today > 0:
+
+					index_last = index_today - 1
+					last_item = date_fatturazione[index_last]
+
+					ragione_sociale = p.ragione_sociale
+					partita_iva = p.partita_iva
+					codice_fiscale = p.codice_fiscale
+					indirizzo = p.indirizzo
+					full_name = p.get_full_name()
+					email = p.email
+					descrizione = "Contratto marketing del " + today.strftime("%d/%m/%Y")
+
+					importo_speso_totale = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gte=last_item).aggregate(Sum('importo'))['importo__sum']
+					percentuale_marketing = contratto.percentuale_marketing
+
+					if importo_speso_totale:
+						commissione = float(importo_speso_totale) * (percentuale_marketing / 100)
+						commissione = round(commissione, 2)
+
+						iva = commissione * (0.22)
+						commissione_con_iva = commissione + iva
+						commissione_con_iva = round(commissione_con_iva, 2)
+
+						print "--- Contratto Marketing ----"
+						print ragione_sociale
+						print partita_iva
+						print codice_fiscale
+						print indirizzo
+						print full_name
+						print email
+						print descrizione
+						print "Totale speso: "
+						print importo_speso_totale
+						print "Commissione: "
+						print commissione
+						print commissione_con_iva
+						print "----------------------------"
+
+						# url = FATTURE_CLOUD_ENDPOINT + "/info/account"
+						# data = {
+						# 	"api_uid" : FATTURE_CLOUD_API_UID,
+						# 	"api_key" : FATTURE_CLOUD_API_KEY,
+						# 	"campi": ["lista_iva"]
+						# }
+
+						# r = requests.post(url, json=data)
+						# a = r.json()
+						# for x in a['lista_iva']:
+						# 	print x
+
+						url = FATTURE_CLOUD_ENDPOINT + "/fatture/nuovo"
+
+						data = {
+							"api_uid" : FATTURE_CLOUD_API_UID,
+							"api_key" : FATTURE_CLOUD_API_KEY,
+							"nome" : ragione_sociale,
+							"indirizzo_via" : indirizzo,
+							"piva" : partita_iva,
+							"cf" : codice_fiscale,
+							"autocompila_anagrafica" : True,
+							"salva_anagrafica" : True,
+							"data" : today.strftime("%d/%m/%Y"),
+							"prezzi_ivati" : False,
+							"lista_articoli" : [
+								{
+									"nome" : "Chibe",
+									"descrizione" : descrizione,
+									"prezzo_netto" : commissione,
+									"prezzo_lordo" : commissione_con_iva,
+									"cod_iva": 0
+								}
+							],
+							"lista_pagamenti" : [
+								{
+									"data_scadenza" : today.strftime("%d/%m/%Y"),
+									"data_saldo" : today.strftime("%d/%m/%Y"),
+									"importo" : "auto",
+									"metodo" : "not",
+								}
+							]
+						}
+
+						r = requests.post(url, json=data)
+						print r.json()
+
+
+						#time.sleep(3)
 
 
 

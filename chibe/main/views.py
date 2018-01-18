@@ -385,7 +385,7 @@ def upload_picture(request):
 	image = Image.open(imagefile)
 
 	now = datetime.now()
-	now_formatted = now.strftime("%Y-%m-%d_%H-%M")
+	now_formatted = now.strftime("%Y-%m-%d_%H-%M-%S")
 	token = hashlib.sha224(now_formatted).hexdigest()	
 	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
 	image.save(outfile, "JPEG")	
@@ -959,7 +959,7 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 
 			notifica_amico(utente, pp_nuovo)
 
-
+from .forms import NameForm
 class utente_invito(View):
 	def dispatch(self, *args, **kwargs):
 		return super(utente_invito, self).dispatch(*args, **kwargs)
@@ -967,10 +967,13 @@ class utente_invito(View):
 	def get(self, request, token, *args, **kwargs):
 		utente = get_object_or_404(Utente, codice=token)
 
+		form = NameForm()
+
 		args = {
 			"utente" : utente,
 			"token" : token,
-			"CLIENT_ID": CLIENT_ID
+			"CLIENT_ID": CLIENT_ID,
+			"form" : form
 		}
 
 		template_name = "utente_invito.html"
@@ -979,8 +982,27 @@ class utente_invito(View):
 	def post(self, request, token, *args, **kwargs):
 		utente = get_object_or_404(Utente, codice=token)
 
-		username = request.POST.get("username", None)
-		email = request.POST.get("email", None)
+		form = NameForm(request.POST)
+
+		if form.is_valid():
+			username = form.cleaned_data['username']
+			email = form.cleaned_data['email']
+
+			password_1 = form.cleaned_data['password_1']
+			password_2 = form.cleaned_data['password_2']
+		else:
+			args = {
+				"utente" : utente,
+				"token" : token,
+				"CLIENT_ID": CLIENT_ID,
+				"form" : form
+			}
+
+			template_name = "utente_invito.html"
+			return render(request, template_name, args)			
+
+		#username = request.POST.get("username", None)
+		#email = request.POST.get("email", None)
 
 		email = email.strip()
 		username = username.strip()
@@ -999,8 +1021,8 @@ class utente_invito(View):
 			url = reverse('utente_invito', kwargs = {'token': token})
 			return HttpResponseRedirect(url)
 
-		password_1 = request.POST.get("password_1", None)
-		password_2 = request.POST.get("password_2", None)
+		#password_1 = request.POST.get("password_1", None)
+		#password_2 = request.POST.get("password_2", None)
 
 		if password_1 != password_2:
 			messages.error(request, "Le due password non coincidono")
@@ -1027,8 +1049,12 @@ class utente_invito(View):
 		#Punti al vecchio
 		pp_vecchio = PUNTI_BONUS
 		utente_punti_vecchi = utente.punti
-		utente.punti = utente_punti_vecchi + pp_vecchio
-		utente.save()
+		print "AAAAAA"
+		print utente_punti_vecchi
+		print "BBBBB"
+		if utente_punti_vecchi < 1000:
+			utente.punti = utente_punti_vecchi + pp_vecchio
+			utente.save()
 
 		notifica_amico(utente, pp_nuovo)
 

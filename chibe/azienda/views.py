@@ -59,7 +59,8 @@ class azienda_categorie(View):
 
 	def get(self, request, *args, **kwargs):	
 		user = request.user
-		username = user.username
+		#username = user.username
+		username = "352701061243090"
 		partner = Partner.objects.get(username = username)
 		
 		categorie = partner.categorie.all()
@@ -359,7 +360,7 @@ def calcolo_punti(partner, acquisto):
 	return Pp
 
 
-from .tasks import salute, check_tribu, period_check_15, check_fatturazione
+from .tasks import salute, check_tribu, check_fatturazione
 def test(request):
 	check_fatturazione()
 	return HttpResponse("Successo!!!")

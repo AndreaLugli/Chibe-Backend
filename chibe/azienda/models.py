@@ -51,6 +51,8 @@ class ContrattoMarketing(models.Model):
 				list_date.append(data)
 
 		list_date.append(fine)
+		list_date = sorted(list_date)
+
 		return list_date
 
 	def __unicode__(self):
