@@ -86,9 +86,13 @@ def check_fatturazione():
 					indirizzo = p.indirizzo
 					full_name = p.get_full_name()
 					email = p.email
-					descrizione = "Contratto marketing del " + today.strftime("%d/%m/%Y")
 
-					importo_speso_totale = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gte=last_item).aggregate(Sum('importo'))['importo__sum']
+					inizio = contratto.inizio
+					
+					descrizione = "Contratto marketing del %s - Periodo di fatturazione dal giorno %s al giorno %s" % (inizio.strftime("%d/%m/%Y"), last_item.strftime("%d/%m/%Y"), today.strftime("%d/%m/%Y")) 
+
+					importo_speso_totale = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item).aggregate(Sum('importo'))['importo__sum']
+					
 					percentuale_marketing = contratto.percentuale_marketing
 
 					if importo_speso_totale:
@@ -114,18 +118,6 @@ def check_fatturazione():
 						print commissione_con_iva
 						print "----------------------------"
 
-						# url = FATTURE_CLOUD_ENDPOINT + "/info/account"
-						# data = {
-						# 	"api_uid" : FATTURE_CLOUD_API_UID,
-						# 	"api_key" : FATTURE_CLOUD_API_KEY,
-						# 	"campi": ["lista_iva"]
-						# }
-
-						# r = requests.post(url, json=data)
-						# a = r.json()
-						# for x in a['lista_iva']:
-						# 	print x
-
 						url = FATTURE_CLOUD_ENDPOINT + "/fatture/nuovo"
 
 						data = {
@@ -139,6 +131,7 @@ def check_fatturazione():
 							"salva_anagrafica" : True,
 							"data" : today.strftime("%d/%m/%Y"),
 							"prezzi_ivati" : False,
+							"email" : email,
 							"lista_articoli" : [
 								{
 									"nome" : "Chibe",
@@ -158,8 +151,8 @@ def check_fatturazione():
 							]
 						}
 
-						r = requests.post(url, json=data)
-						print r.json()
+						#r = requests.post(url, json=data)
+						#print r.json()
 
 
 						#time.sleep(3)

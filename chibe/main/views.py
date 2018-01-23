@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound, HttpResponseBadRequest
 from chibe.email_system import email_reset_password
-from chibe.push import notifica_amico
+from chibe.push import notifica_amico, invia_punti_push
 from django.core.urlresolvers import reverse
 from django.views.generic import View
 from django.contrib.auth import authenticate, login
@@ -561,7 +561,9 @@ def utente_desideri(request):
 			"percentuale" : percentuale
 		}
 
-		list_gruppi.append(gruppo_json)
+		ordine_ex = OrdineDesiderio.objects.filter(gruppo = gruppo, ritirato = True).exists()
+		if not ordine_ex:
+			list_gruppi.append(gruppo_json)
 
 	return JsonResponse(list_gruppi, safe = False)
 
@@ -594,6 +596,8 @@ def utente_inviapunti(request):
 	amico_punti_new = amico_punti_old + punti
 	amico.punti = amico_punti_new
 	amico.save()
+
+	invia_punti_push(username, punti, amico)
 
 	return HttpResponse()
 
@@ -716,6 +720,26 @@ class utente_gruppo_riscatta(View):
 
 		else:
 			print "Fai qualcosa"
+
+		return HttpResponse()
+
+class utente_gruppo_rimuovi(View):
+	@method_decorator(csrf_exempt)
+	def dispatch(self, *args, **kwargs):
+		return super(utente_gruppo_rimuovi, self).dispatch(*args, **kwargs)
+
+	def post(self, request, id, *args, **kwargs):	
+		user = request.user
+		username = user.username
+		utente = Utente.objects.get(username = username)
+
+		gruppo = Gruppo.objects.get(pk = id)
+		utente_admin = gruppo.utente_admin
+
+		if utente.id == utente_admin.id:
+			gruppo.delete()
+		else:
+			gruppo.utenti.remove(utente)
 
 		return HttpResponse()
 

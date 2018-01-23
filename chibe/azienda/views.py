@@ -164,12 +164,13 @@ class azienda_search(View):
 				tribu_val = tribu.nome
 				partners = [d for d in partners if d['tribu'] == tribu_val]
 
-		paginator = Paginator(partners, 10)
+		paginator = Paginator(partners, 50)
 
-		page = request.GET.get("page")
+		#page = request.GET.get("page")
 
-		if page == "null":
-			page = 1
+		#if page == "null":
+		#	page = 1
+		page = 1
 
 		try:
 			partners_list = paginator.page(page)

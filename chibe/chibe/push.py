@@ -41,3 +41,7 @@ def notifica_restituzione(member, premio):
 def notifica_scadenza(member, premio):
 	content = "Il premio %s non è più disponibile, sei stato rimborsato" % (premio)
 	push_generic(member, content)
+
+def invia_punti_push(username, punti, amico):
+	content = "%s ti ha inviato %s punti" % (username, str(punti))
+	push_generic(amico, content)
