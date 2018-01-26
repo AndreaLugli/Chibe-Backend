@@ -21,6 +21,6 @@ class ContrattoMarketingAdmin(admin.ModelAdmin):
 class AcquistoAdmin(admin.ModelAdmin):
 	list_display = ['utente', 'partner', 'importo', 'timestamp']
 
-@admin.register(Fattura)
+#@admin.register(Fattura)
 class FatturaAdmin(admin.ModelAdmin):
 	list_display = ["partner", "importo", "periodo_iniziale", "periodo_finale"]

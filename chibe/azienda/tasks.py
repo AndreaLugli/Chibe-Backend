@@ -6,6 +6,10 @@ from datetime import date, datetime, timedelta
 from chibe.push import push_generic
 from django.db.models import Sum
 from django.utils import timezone
+import csv
+import StringIO
+from django.core.mail import EmailMultiAlternatives
+
 import pytz
 import requests
 import time
@@ -91,8 +95,14 @@ def check_fatturazione():
 					
 					descrizione = "Contratto marketing del %s - Periodo di fatturazione dal giorno %s al giorno %s" % (inizio.strftime("%d/%m/%Y"), last_item.strftime("%d/%m/%Y"), today.strftime("%d/%m/%Y")) 
 
-					importo_speso_totale = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item).aggregate(Sum('importo'))['importo__sum']
+					oggetto_email = "Report movimenti Chibe periodo dal %s al %s" % (last_item.strftime("%d/%m/%Y"), today.strftime("%d/%m/%Y"))
+
+					#importo_speso_totale = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item).aggregate(Sum('importo'))['importo__sum']
 					
+					tutti_acquisti = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item)
+
+					importo_speso_totale = tutti_acquisti.aggregate(Sum('importo'))['importo__sum']
+
 					percentuale_marketing = contratto.percentuale_marketing
 
 					if importo_speso_totale:
@@ -103,20 +113,20 @@ def check_fatturazione():
 						commissione_con_iva = commissione + iva
 						commissione_con_iva = round(commissione_con_iva, 2)
 
-						print "--- Contratto Marketing ----"
-						print ragione_sociale
-						print partita_iva
-						print codice_fiscale
-						print indirizzo
-						print full_name
-						print email
-						print descrizione
-						print "Totale speso: "
-						print importo_speso_totale
-						print "Commissione: "
-						print commissione
-						print commissione_con_iva
-						print "----------------------------"
+						# print "--- Contratto Marketing ----"
+						# print ragione_sociale
+						# print partita_iva
+						# print codice_fiscale
+						# print indirizzo
+						# print full_name
+						# print email
+						# print descrizione
+						# print "Totale speso: "
+						# print importo_speso_totale
+						# print "Commissione: "
+						# print commissione
+						# print commissione_con_iva
+						# print "----------------------------"
 
 						url = FATTURE_CLOUD_ENDPOINT + "/fatture/nuovo"
 
@@ -151,11 +161,57 @@ def check_fatturazione():
 							]
 						}
 
-						#r = requests.post(url, json=data)
+						r = requests.post(url, json=data)
 						#print r.json()
-
-
 						#time.sleep(3)
+						#email_fattura(p, tutti_acquisti, oggetto_email)
+						email_fattura(partner, tutti_acquisti, oggetto_email).delay()
+
+@shared_task
+def email_fattura(partner, acquisti, oggetto_email):
+
+	nome = partner.get_full_name()
+	ragione_sociale = partner.ragione_sociale
+	indirizzo = partner.indirizzo
+	email = partner.email
+
+	testo_email = "\
+		Gentile %s,<br>\
+		in allegato trova il report periodico con i movimenti fatti dai nostri Chibers nel suo locale %s in %s.<br><br>\
+		Per qualunque informazione non esiti a contattarci alla nostra email info@chibe.it<br><br>\
+		A presto,<br>\
+		Il team di Chibe" % (nome, ragione_sociale, indirizzo)
+
+	csvfile = StringIO.StringIO()
+	csvwriter = csv.writer(csvfile)
+
+	csvwriter.writerow(['codice utente', 'data', 'importo', 'FAMOCO'])
+
+	for acquisto in acquisti:
+		utente = acquisto.utente
+		timestamp = acquisto.timestamp
+		p = acquisto.partner
+
+		codice_utente = utente.codice
+		data = timestamp.strftime("%d/%m/%Y %H:%M:%S")
+		importo = acquisto.importo
+		famoco = p.username
+
+		csvwriter.writerow([codice_utente, data, importo, famoco])
+
+	from_email = 'chibe@chibeapp.com'
+	to = email
+	to = "senblet@gmail.com"
+	subject = oggetto_email
+
+	nomefile = "movimenti.csv"
+
+	html_content = testo_email
+	text_content = html_content
+	msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+	msg.attach_alternative(html_content, "text/html") 
+	msg.attach(nomefile, csvfile.getvalue(), 'text/csv')       
+	msg.send()
 
 
 

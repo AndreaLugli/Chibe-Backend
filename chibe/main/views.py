@@ -460,7 +460,8 @@ def utente_amico_delete(request):
 @csrf_exempt
 def utente_info(request):
 	user = request.user
-	username = user.username
+	#username = user.username
+	username = "negro"
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
