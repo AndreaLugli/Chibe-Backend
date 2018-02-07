@@ -30,7 +30,7 @@ AVATAR_MEDIA_ROOT = settings.MEDIA_ROOT + "/avatar"
 PUNTI_BONUS = 100
 
 def check_connected(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 
 		username = request.user.username
 		utente = Utente.objects.get(username = username)
@@ -353,9 +353,13 @@ class utente_step3(View):
 		classe = request.POST.get("classe", None)
 		newsletter = request.POST.get("newsletter", None)
 
-		sesso = request.POST['sesso']
-		compleanno = request.POST['compleanno']
-		compleanno_obj = datetime.strptime(compleanno, '%Y-%M-%d').date()
+		sesso = request.POST.get('sesso', "M")
+		compleanno = request.POST.get('compleanno', None)
+		if compleanno:
+			compleanno_obj = datetime.strptime(compleanno, '%Y-%M-%d').date()
+		else:
+			compleanno_obj = datetime.strptime("1970-01-01", '%Y-%M-%d').date()
+
 		utente.compleanno = compleanno_obj
 		utente.sesso = sesso
 
@@ -375,6 +379,8 @@ class utente_step3(View):
 
 @csrf_exempt
 def upload_picture(request):
+	user = request.user
+	username = user.username
 
 	f = request.FILES['file']
 
@@ -386,7 +392,8 @@ def upload_picture(request):
 
 	now = datetime.now()
 	now_formatted = now.strftime("%Y-%m-%d_%H-%M-%S")
-	token = hashlib.sha224(now_formatted).hexdigest()	
+	#token = hashlib.sha224(now_formatted).hexdigest()	
+	token = hashlib.sha224(username).hexdigest()	
 	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
 	image.save(outfile, "JPEG")	
 
@@ -460,8 +467,8 @@ def utente_amico_delete(request):
 @csrf_exempt
 def utente_info(request):
 	user = request.user
-	#username = user.username
-	username = "negro"
+	username = user.username
+
 	utente = Utente.objects.get(username = username)
 
 	modifica_tribu = None
@@ -530,6 +537,7 @@ def utente_modifica(request):
 def utente_desideri(request):
 	user = request.user
 	username = user.username
+
 	utente = Utente.objects.get(username = username)
 
 	gruppi = Gruppo.objects.filter(utenti = utente)
@@ -610,6 +618,7 @@ class utente_gruppo(View):
 	def get(self, request, id, *args, **kwargs):	
 		user = request.user
 		username = user.username
+
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.select_related('desiderio').get(pk = id)
@@ -696,6 +705,7 @@ class utente_gruppo_riscatta(View):
 	def post(self, request, id, *args, **kwargs):	
 		user = request.user
 		username = user.username
+
 		utente = Utente.objects.get(username = username)
 
 		gruppo = Gruppo.objects.get(pk = id)

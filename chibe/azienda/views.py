@@ -139,11 +139,20 @@ class azienda_search(View):
 
 	def get(self, request, *args, **kwargs):	
 
-		latitude = request.GET['latitude']
-		longitude = request.GET['longitude']
+		latitude = request.GET.get('latitude', None)
+		longitude = request.GET.get('longitude', None)
+
+		if (not latitude) and (not longitude):
+			return JsonResponse([], safe = False)
+
 		distanza = float(10)
 
-		partners = Partner.objects_search.search(latitude, longitude, distanza)
+		tipo = request.GET.get("tipo", "ZERO")
+
+		if tipo == "ZERO":
+			partners = Partner.objects_search.search(latitude, longitude, distanza)
+		else:
+			partners = Partner.objects_search.filter(categoria_partner = tipo).search(latitude, longitude, distanza)
 
 		order = request.GET.get("order", "vicini")
 

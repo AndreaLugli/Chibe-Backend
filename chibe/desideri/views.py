@@ -9,6 +9,46 @@ from django.shortcuts import render
 from .models import Desiderio
 from main.models import Gruppo, Utente
 
+from django.db.models import Count
+def desideri_new_home(request):
+	now = datetime.now().date()
+
+	desideri = []
+
+	all_desideri = Desiderio.objects.filter(
+		data_inizio__lte = now, 
+		data_fine__gte = now,
+		sku__gte=1
+	).values(
+		"id", 
+		"nome",
+		"descrizione_breve", 
+		"in_evidenza", 
+		"num_gruppo", 
+		"immagine",
+		"big_picture",
+		"in_evidenza",
+		"categoria__nome"
+	)
+
+	grouped = dict()
+
+	for obj in all_desideri:
+		grouped.setdefault(obj['categoria__nome'], []).append(obj)
+
+
+	for g in grouped:
+		items_des = grouped[g]
+
+		json_d = {
+			"categoria" : g,
+			"desideri" : items_des
+		}
+
+		desideri.append(json_d)
+
+	return JsonResponse(desideri, safe = False)
+
 def desideri_home(request):
 	now = datetime.now().date()
 
@@ -68,6 +108,7 @@ class desideri_id(View):
 	def post(self, request, id, *args, **kwargs):
 		user = request.user
 		username = user.username
+
 		utente = Utente.objects.get(username = username)		
 
 		d = Desiderio.objects.get(pk = id)
