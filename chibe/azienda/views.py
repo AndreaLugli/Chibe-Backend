@@ -28,8 +28,6 @@ class azienda_login(View):
 	def post(self, request, *args, **kwargs):
 		imei = request.POST.get("imei", None)
 
-		logger.debug(request.POST)
-
 		user = authenticate(request, username=imei, password=imei)
 
 		if user is not None:
@@ -128,7 +126,6 @@ class azienda_premio(View):
 					return HttpResponseBadRequest("Premio non disponibile nell'attività")
 		else:
 			return HttpResponseBadRequest("Codice errato")
-
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger

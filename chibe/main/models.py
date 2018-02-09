@@ -170,7 +170,10 @@ class PushNotification(models.Model):
 		verbose_name_plural = "Notifiche push"
 
 
-
+class Invito(models.Model):
+	invitato = models.ForeignKey(Utente, related_name = "invitato")
+	host = models.ForeignKey(Utente, related_name = "host")
+	redeemed = models.BooleanField(default = False)
 
 
 

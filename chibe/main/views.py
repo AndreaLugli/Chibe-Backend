@@ -17,6 +17,7 @@ from .models import Utente, OnBoard, Tribu, ResetPassword
 from .models import Provincia, Scuola
 from .models import Gruppo, PuntiGruppo, OrdineDesiderio
 from .models import PushNotification
+from .models import Invito
 from .tasks import check_sku_groups
 from social_django.models import UserSocialAuth
 from django.conf import settings
@@ -112,6 +113,28 @@ class utente_login(View):
 				"output": output
 			}
 
+
+			inv_ex = Invito.objects.filter(invitato = utente, redeemed = False).exists()
+			if inv_ex:
+				invito = Invito.objects.filter(invitato = utente, redeemed = False).first()
+
+				# Punti al nuovo
+				utente_nuovo_punti = utente.punti
+				utente.punti = utente_nuovo_punti + PUNTI_BONUS
+				utente.save()
+
+				# Check sull host
+				host = invito.host
+				utente_punti_vecchi = host.punti
+
+				num_inviti_host = Invito.objects.filter(host = host).count()
+
+				if (utente_punti_vecchi < 1000) and (num_inviti_host < 11):
+					host.punti = utente_punti_vecchi + PUNTI_BONUS
+					host.save()
+
+					notifica_amico(host, PUNTI_BONUS)
+
 			return JsonResponse(json_output)
 		else:
 			return HttpResponse('Unauthorized', status=401)
@@ -136,7 +159,6 @@ class utente_forgot_password(View):
 		email_reset_password(email, token)
 
 		return HttpResponse()
-
 
 class utente_forgot_password_token(View):
 	@method_decorator(csrf_exempt)
@@ -169,8 +191,6 @@ class utente_forgot_password_token(View):
 		messages.success(request, "Password reimpostata con successo")
 		url = reverse('utente_forgot_password_token', kwargs = {'token': token})
 		return HttpResponseRedirect(url)
-
-
 
 class utente_register(View):
 	@method_decorator(csrf_exempt)
@@ -992,7 +1012,7 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 			utente.punti = utente_punti_vecchi + pp_vecchio
 			utente.save()
 
-			notifica_amico(utente, pp_nuovo)
+			notifica_amico(utente, PUNTI_BONUS)
 
 from .forms import NameForm
 class utente_invito(View):
@@ -1036,9 +1056,6 @@ class utente_invito(View):
 			template_name = "utente_invito.html"
 			return render(request, template_name, args)			
 
-		#username = request.POST.get("username", None)
-		#email = request.POST.get("email", None)
-
 		email = email.strip()
 		username = username.strip()
 		
@@ -1056,9 +1073,6 @@ class utente_invito(View):
 			url = reverse('utente_invito', kwargs = {'token': token})
 			return HttpResponseRedirect(url)
 
-		#password_1 = request.POST.get("password_1", None)
-		#password_2 = request.POST.get("password_2", None)
-
 		if password_1 != password_2:
 			messages.error(request, "Le due password non coincidono")
 			url = reverse('utente_invito', kwargs = {'token': token})
@@ -1075,23 +1089,10 @@ class utente_invito(View):
 
 		OnBoard.objects.create(utente = utente_obj)
 
-		#Punti al nuovo		
-		pp_nuovo = PUNTI_BONUS
-		utente_obj_punti_vecchi = utente_obj.punti
-		utente_obj.punti = utente_obj_punti_vecchi + pp_nuovo 
-		utente_obj.save()
-
-		#Punti al vecchio
-		pp_vecchio = PUNTI_BONUS
-		utente_punti_vecchi = utente.punti
-		print "AAAAAA"
-		print utente_punti_vecchi
-		print "BBBBB"
-		if utente_punti_vecchi < 1000:
-			utente.punti = utente_punti_vecchi + pp_vecchio
-			utente.save()
-
-		notifica_amico(utente, pp_nuovo)
+		Invito.objects.create(
+			invitato = utente_obj,
+			host = utente
+		)
 
 		args = {
 			"success" : True,
@@ -1109,7 +1110,6 @@ def successo_invito(request):
 
 	template_name = "utente_invito.html"
 	return render(request, template_name, args)
-
 
 def utente_invitecode(request):
 	user = request.user
