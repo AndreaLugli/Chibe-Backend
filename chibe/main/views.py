@@ -401,6 +401,7 @@ class utente_step3(View):
 def upload_picture(request):
 	user = request.user
 	username = user.username
+	utente = Utente.objects.get(username = username)
 
 	f = request.FILES['file']
 
@@ -410,10 +411,8 @@ def upload_picture(request):
 	imagefile  = StringIO.StringIO(str)
 	image = Image.open(imagefile)
 
-	now = datetime.now()
-	now_formatted = now.strftime("%Y-%m-%d_%H-%M-%S")
-	#token = hashlib.sha224(now_formatted).hexdigest()	
-	token = hashlib.sha224(username).hexdigest()	
+	token = str(utente.codice)
+
 	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
 	image.save(outfile, "JPEG")	
 
@@ -963,14 +962,6 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 		last_name = response['last_name']
 		email = response.get("email", None)
 
-	now = datetime.now()
-	now_formatted = now.strftime("%Y-%m-%d_%H-%M")
-	token = hashlib.sha224(now_formatted).hexdigest()	
-	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
-
-	wget.download(url_avatar, out=outfile)
-	output = "/media/avatar/" + token + '.jpg'
-
 	if email:
 		user.email = email
 		
@@ -990,6 +981,11 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 
 		OnBoard.objects.create(utente = member)
 
+	token = str(member.codice)
+	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
+
+	wget.download(url_avatar, out=outfile)
+	output = "/media/avatar/" + token + '.jpg'
 	member.avatar = output
 
 	member.__dict__.update(user.__dict__)
