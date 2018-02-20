@@ -411,7 +411,8 @@ def upload_picture(request):
 	imagefile  = StringIO.StringIO(str)
 	image = Image.open(imagefile)
 
-	token = str(utente.codice)
+	token = utente.codice
+	#token = str(token)
 
 	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
 	image.save(outfile, "JPEG")	
@@ -423,7 +424,7 @@ def upload_picture(request):
 def get_code(request):
 	user = request.user
 	username = user.username
-	
+
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
 	return HttpResponse(codice)
@@ -883,11 +884,12 @@ class CustomGooglePlusAuth(GooglePlusAuth):
 	def do_auth(self, access_token, *args, **kwargs):
 		"""Finish the auth process once the access_token was retrieved"""
 		res = kwargs.get('response')
-		id_token = res['id_token']
+
 		account_details = False
 		try:
 			data = self.user_data(access_token, *args, **kwargs)
 		except:
+			id_token = res['id_token']
 			data = self.user_data(id_token, *args, **kwargs)
 			account_details_request = requests2.get('https://www.googleapis.com/plus/v1/people/me?access_token=' + access_token)
 			account_details = account_details_request.json()	
@@ -946,6 +948,10 @@ def register_by_access_token(request, backend):
 
 		return JsonResponse(json_output)
 
+
+import logging
+logger = logging.getLogger('django')
+
 def register_social(backend, user, response, strategy, *args, **kwargs):
 
 	backend_name = backend.name
@@ -975,20 +981,23 @@ def register_social(backend, user, response, strategy, *args, **kwargs):
 		member = Utente.objects.get(user_ptr = user)
 	else:
 		member = Utente(user_ptr = user)
+		member.__dict__.update(user.__dict__)
+		
 		codice = generate_code()
 		member.codice = codice
 		member.save()
 
 		OnBoard.objects.create(utente = member)
 
-	token = str(member.codice)
+	token = member.codice
+	token = str(token)
+
 	outfile = AVATAR_MEDIA_ROOT + '/' + token + '.jpg'
 
 	wget.download(url_avatar, out=outfile)
 	output = "/media/avatar/" + token + '.jpg'
 	member.avatar = output
 
-	member.__dict__.update(user.__dict__)
 	member.save()
 
 	if not member_exists:

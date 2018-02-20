@@ -16,8 +16,8 @@ STATICFILES_DIRS = [
 	'/Users/riccardo/Desktop/chibe/chibe/static',
 ]
 
-MEDIA_ROOT = "/Users/riccardo/Desktop/chibe/chibe/media" 
-PATH_CERT = '/Users/riccardo/Desktop/chibe/chibe/certs/AuthKey_4L273B4DB4.p8' #DEV
+MEDIA_ROOT = "/Users/riccardo/Desktop/Progetti/chibe/chibe/media" 
+PATH_CERT = '/Users/riccardo/Desktop/Progetti/chibe/chibe/certs/AuthKey_4L273B4DB4.p8' #DEV
 
 
 LOGGING = {
@@ -44,13 +44,13 @@ LOGGING = {
 		'debug_file': {
 			'level': 'DEBUG',
 			'class': 'logging.FileHandler',
-			'filename': '/Users/riccardo/Desktop/chibe/chibe/logs/debug.log',
+			'filename': '/Users/riccardo/Desktop/Progetti/chibe/chibe/logs/debug.log',
 			'formatter': 'verbose'
 		},
 		'error_file': {
 			'level': 'ERROR',
 			'class': 'logging.FileHandler',
-			'filename': '/Users/riccardo/Desktop/chibe/chibe/logs/error.log',
+			'filename': '/Users/riccardo/Desktop/Progetti/chibe/chibe/logs/error.log',
 			'formatter': 'verbose'
 		},
 	},

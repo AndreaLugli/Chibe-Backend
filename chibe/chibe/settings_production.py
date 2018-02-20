@@ -69,7 +69,7 @@ LOGGING = {
 			'handlers': ['null'],
 			'propagate': False,
 		},
-		'django.request': {
+		'django': {
 			'handlers': ['debug_file', 'error_file', 'mail_admins'],
 			'level': 'DEBUG',
 			'propagate': True,

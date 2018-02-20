@@ -31,6 +31,7 @@ RECAPTCHA_PRIVATE_KEY = '6LdvTEEUAAAAAO4INyat5h6ZuOJSAE189JiKkZgS'
 
 AUTHENTICATION_BACKENDS = [
 	'main.views.CustomGooglePlusAuth',
+	#'social_core.backends.google.GooglePlusAuth',
 	'social_core.backends.facebook.FacebookOAuth2',
 	'django.contrib.auth.backends.ModelBackend',
 ]
