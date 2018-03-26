@@ -97,8 +97,6 @@ def check_fatturazione():
 
 					oggetto_email = "Report movimenti Chibe periodo dal %s al %s" % (last_item.strftime("%d/%m/%Y"), today.strftime("%d/%m/%Y"))
 
-					#importo_speso_totale = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item).aggregate(Sum('importo'))['importo__sum']
-					
 					tutti_acquisti = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item)
 
 					importo_speso_totale = tutti_acquisti.aggregate(Sum('importo'))['importo__sum']
@@ -112,21 +110,6 @@ def check_fatturazione():
 						iva = commissione * (0.22)
 						commissione_con_iva = commissione + iva
 						commissione_con_iva = round(commissione_con_iva, 2)
-
-						# print "--- Contratto Marketing ----"
-						# print ragione_sociale
-						# print partita_iva
-						# print codice_fiscale
-						# print indirizzo
-						# print full_name
-						# print email
-						# print descrizione
-						# print "Totale speso: "
-						# print importo_speso_totale
-						# print "Commissione: "
-						# print commissione
-						# print commissione_con_iva
-						# print "----------------------------"
 
 						url = FATTURE_CLOUD_ENDPOINT + "/fatture/nuovo"
 
@@ -165,7 +148,7 @@ def check_fatturazione():
 						#print r.json()
 						#time.sleep(3)
 						#email_fattura(p, tutti_acquisti, oggetto_email)
-						email_fattura(partner, tutti_acquisti, oggetto_email).delay()
+						email_fattura(p, tutti_acquisti, oggetto_email).delay()
 
 @shared_task
 def email_fattura(partner, acquisti, oggetto_email):
@@ -212,6 +195,112 @@ def email_fattura(partner, acquisti, oggetto_email):
 	msg.attach_alternative(html_content, "text/html") 
 	msg.attach(nomefile, csvfile.getvalue(), 'text/csv')       
 	msg.send()
+
+
+@shared_task
+def genera_fattura():
+	today = date.today()
+	today_str = today.strftime("%d/%m/%Y") 
+
+	oggi = today.day
+	giorno_fatturazione = 5
+	giorno_fatturazione = 12 #DEBUG
+
+	if oggi == giorno_fatturazione:
+		first = today.replace(day = 1)
+		ultimoMese = first - timedelta(days = 1)
+		ultimoMese_str = ultimoMese.strftime("%d/%m/%Y")
+
+		mese = ultimoMese.month
+		anno = ultimoMese.year
+
+		partners = Partner.objects.select_related("contratto").filter(attivo = True)
+		for p in partners:
+			contratto = p.contratto
+			inizio = contratto.inizio
+			is_valid = contratto.is_valid()
+			if is_valid:
+				tutti_acquisti = Acquisto.objects.filter(partner = p, timestamp__month = mese, timestamp__year = anno)
+				if tutti_acquisti:
+
+					primoMese = ultimoMese.replace(day = 1)
+					primoMese_str = primoMese.strftime("%d/%m/%Y")
+
+					descrizione = "Contratto marketing del %s - Periodo di fatturazione dal giorno %s al giorno %s" % (inizio.strftime("%d/%m/%Y"), primoMese_str, ultimoMese_str) 
+
+					oggetto_email = "Report movimenti Chibe periodo dal %s al %s" % (primoMese_str, ultimoMese_str)
+
+					importo_speso_totale = tutti_acquisti.aggregate(Sum('importo'))['importo__sum']
+
+					percentuale_marketing = contratto.percentuale_marketing
+
+					ragione_sociale = p.ragione_sociale
+					partita_iva = p.partita_iva
+					codice_fiscale = p.codice_fiscale
+					indirizzo = p.indirizzo
+					email = p.email
+
+					if importo_speso_totale:
+						commissione = float(importo_speso_totale) * (percentuale_marketing / 100)
+						commissione = round(commissione, 2)
+
+						iva = commissione * (0.22)
+						commissione_con_iva = commissione + iva
+						commissione_con_iva = round(commissione_con_iva, 2)
+
+						url = FATTURE_CLOUD_ENDPOINT + "/fatture/nuovo"
+
+						data = {
+							"api_uid" : FATTURE_CLOUD_API_UID,
+							"api_key" : FATTURE_CLOUD_API_KEY,
+							"nome" : ragione_sociale,
+							"indirizzo_via" : indirizzo,
+							"piva" : partita_iva,
+							"cf" : codice_fiscale,
+							"autocompila_anagrafica" : True,
+							"salva_anagrafica" : True,
+							"data" : today_str,
+							"prezzi_ivati" : False,
+							"email" : email,
+							"lista_articoli" : [
+								{
+									"nome" : "Chibe",
+									"descrizione" : descrizione,
+									"prezzo_netto" : commissione,
+									"prezzo_lordo" : commissione_con_iva,
+									"cod_iva": 0
+								}
+							],
+							"lista_pagamenti" : [
+								{
+									"data_scadenza" : today_str,
+									"data_saldo" : today_str,
+									"importo" : "auto",
+									"metodo" : "not",
+								}
+							]
+						}
+
+						#r = requests.post(url, json=data)
+						#print r.json()
+						#time.sleep(3)
+						#email_fattura(p, tutti_acquisti, oggetto_email).delay()
+						print data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

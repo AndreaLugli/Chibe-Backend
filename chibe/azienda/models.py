@@ -173,11 +173,19 @@ class Partner(User):
 	contratto = models.ForeignKey(ContrattoMarketing, blank = True, null = True)
 
 	CATEGORIA_PARTNER = (
-		("RIS", "Ristoranti"),
+		("RIS", "Food"),
 		("ABB", "Abbigliamento"),
 		("BAR", "Bar"),
 		("SPO", "Sport"),
-		("TEC", "Tech")
+		("TEC", "Gaming"),
+
+		("OTT", "Ottica"),
+		("GIO", "Gioielleria"),
+		("LIB", "Librerie/Cartolerie"),
+		("COL", "Collezionismo"),
+		("INT", "Intrattenimento"),
+		("EST", "Estetica/Benessere"),
+
 	)
 
 	categoria_partner = models.CharField(max_length = 3, choices = CATEGORIA_PARTNER, blank = True, null = True)	

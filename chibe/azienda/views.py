@@ -381,9 +381,9 @@ def calcolo_punti(partner, acquisto):
 	return Pp
 
 
-from .tasks import salute, check_tribu, check_fatturazione
+from .tasks import salute, check_tribu, genera_fattura
 def test(request):
-	check_fatturazione()
+	genera_fattura()
 	return HttpResponse("Successo!!!")
 
 
