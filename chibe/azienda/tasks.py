@@ -13,6 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 import pytz
 import requests
 import time
+import json
 
 FATTURE_CLOUD_API_UID = 113399
 FATTURE_CLOUD_API_KEY = "441a70874e93291e5862776149024105"
@@ -184,7 +185,6 @@ def email_fattura(partner, acquisti, oggetto_email):
 
 	from_email = 'chibe@chibeapp.com'
 	to = email
-	to = "senblet@gmail.com"
 	subject = oggetto_email
 
 	nomefile = "movimenti.csv"
@@ -204,12 +204,14 @@ def genera_fattura():
 
 	oggi = today.day
 	giorno_fatturazione = 5
-	giorno_fatturazione = 12 #DEBUG
+	giorno_fatturazione = 26 #DEBUG
 
 	if oggi == giorno_fatturazione:
 		first = today.replace(day = 1)
 		ultimoMese = first - timedelta(days = 1)
 		ultimoMese_str = ultimoMese.strftime("%d/%m/%Y")
+
+		data_scadenza = today.replace(day = 15).strftime("%d/%m/%Y")
 
 		mese = ultimoMese.month
 		anno = ultimoMese.year
@@ -221,6 +223,7 @@ def genera_fattura():
 			is_valid = contratto.is_valid()
 			if is_valid:
 				tutti_acquisti = Acquisto.objects.filter(partner = p, timestamp__month = mese, timestamp__year = anno)
+
 				if tutti_acquisti:
 
 					primoMese = ultimoMese.replace(day = 1)
@@ -273,39 +276,22 @@ def genera_fattura():
 							],
 							"lista_pagamenti" : [
 								{
-									"data_scadenza" : today_str,
+									"data_scadenza" : data_scadenza,
 									"data_saldo" : today_str,
 									"importo" : "auto",
 									"metodo" : "not",
 								}
-							]
+							],
+							"mostra_info_pagamento": True,
+							"metodo_pagamento": "Bonifico",
+							"metodo_titoloN": "IBAN",
+							"metodo_descN": "IT76I0538702415000002570502",							
 						}
 
-						#r = requests.post(url, json=data)
-						#print r.json()
-						#time.sleep(3)
-						#email_fattura(p, tutti_acquisti, oggetto_email).delay()
-						print data
+						data = json.dumps(data)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+						r = requests.post(url, data=data)
+						print r.json()
+						time.sleep(3)
+						email_fattura(p, tutti_acquisti, oggetto_email).delay()
 
