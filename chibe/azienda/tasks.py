@@ -5,15 +5,13 @@ from main.models import Tribu
 from datetime import date, datetime, timedelta
 from chibe.push import push_generic
 from django.db.models import Sum
-from django.utils import timezone
 import csv
 import StringIO
 from django.core.mail import EmailMultiAlternatives
 
-import pytz
 import requests
-import time
 import json
+import time
 
 FATTURE_CLOUD_API_UID = 113399
 FATTURE_CLOUD_API_KEY = "441a70874e93291e5862776149024105"
@@ -69,89 +67,6 @@ def check_tribu():
 			notifica_vincenti(p, t)
 
 @shared_task
-def check_fatturazione():
-	today = date.today()
-
-	partners = Partner.objects.select_related("contratto").filter(attivo = True)
-	for p in partners:
-		contratto = p.contratto
-		is_valid = contratto.is_valid()
-		if is_valid:
-			date_fatturazione = contratto.date_fatturazione()
-			if today in date_fatturazione:
-				index_today = date_fatturazione.index(today)
-				if index_today > 0:
-
-					index_last = index_today - 1
-					last_item = date_fatturazione[index_last]
-
-					ragione_sociale = p.ragione_sociale
-					partita_iva = p.partita_iva
-					codice_fiscale = p.codice_fiscale
-					indirizzo = p.indirizzo
-					full_name = p.get_full_name()
-					email = p.email
-
-					inizio = contratto.inizio
-					
-					descrizione = "Contratto marketing del %s - Periodo di fatturazione dal giorno %s al giorno %s" % (inizio.strftime("%d/%m/%Y"), last_item.strftime("%d/%m/%Y"), today.strftime("%d/%m/%Y")) 
-
-					oggetto_email = "Report movimenti Chibe periodo dal %s al %s" % (last_item.strftime("%d/%m/%Y"), today.strftime("%d/%m/%Y"))
-
-					tutti_acquisti = Acquisto.objects.filter(partner = p, timestamp__lte=today, timestamp__gt=last_item)
-
-					importo_speso_totale = tutti_acquisti.aggregate(Sum('importo'))['importo__sum']
-
-					percentuale_marketing = contratto.percentuale_marketing
-
-					if importo_speso_totale:
-						commissione = float(importo_speso_totale) * (percentuale_marketing / 100)
-						commissione = round(commissione, 2)
-
-						iva = commissione * (0.22)
-						commissione_con_iva = commissione + iva
-						commissione_con_iva = round(commissione_con_iva, 2)
-
-						url = FATTURE_CLOUD_ENDPOINT + "/fatture/nuovo"
-
-						data = {
-							"api_uid" : FATTURE_CLOUD_API_UID,
-							"api_key" : FATTURE_CLOUD_API_KEY,
-							"nome" : ragione_sociale,
-							"indirizzo_via" : indirizzo,
-							"piva" : partita_iva,
-							"cf" : codice_fiscale,
-							"autocompila_anagrafica" : True,
-							"salva_anagrafica" : True,
-							"data" : today.strftime("%d/%m/%Y"),
-							"prezzi_ivati" : False,
-							"email" : email,
-							"lista_articoli" : [
-								{
-									"nome" : "Chibe",
-									"descrizione" : descrizione,
-									"prezzo_netto" : commissione,
-									"prezzo_lordo" : commissione_con_iva,
-									"cod_iva": 0
-								}
-							],
-							"lista_pagamenti" : [
-								{
-									"data_scadenza" : today.strftime("%d/%m/%Y"),
-									"data_saldo" : today.strftime("%d/%m/%Y"),
-									"importo" : "auto",
-									"metodo" : "not",
-								}
-							]
-						}
-
-						r = requests.post(url, json=data)
-						#print r.json()
-						#time.sleep(3)
-						#email_fattura(p, tutti_acquisti, oggetto_email)
-						email_fattura(p, tutti_acquisti, oggetto_email).delay()
-
-@shared_task
 def email_fattura(partner, acquisti, oggetto_email):
 
 	nome = partner.get_full_name()
@@ -185,13 +100,14 @@ def email_fattura(partner, acquisti, oggetto_email):
 
 	from_email = 'chibe@chibeapp.com'
 	to = email
+	cc = "info@chibe.it"
 	subject = oggetto_email
 
 	nomefile = "movimenti.csv"
 
 	html_content = testo_email
 	text_content = html_content
-	msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+	msg = EmailMultiAlternatives(subject, text_content, from_email, [to, cc])
 	msg.attach_alternative(html_content, "text/html") 
 	msg.attach(nomefile, csvfile.getvalue(), 'text/csv')       
 	msg.send()
@@ -204,8 +120,6 @@ def genera_fattura():
 
 	oggi = today.day
 	giorno_fatturazione = 5
-	giorno_fatturazione = 26 #DEBUG
-
 	if oggi == giorno_fatturazione:
 		first = today.replace(day = 1)
 		ultimoMese = first - timedelta(days = 1)
@@ -231,7 +145,8 @@ def genera_fattura():
 
 					descrizione = "Contratto marketing del %s - Periodo di fatturazione dal giorno %s al giorno %s" % (inizio.strftime("%d/%m/%Y"), primoMese_str, ultimoMese_str) 
 
-					oggetto_email = "Report movimenti Chibe periodo dal %s al %s" % (primoMese_str, ultimoMese_str)
+					oggetto_email = "Fattura Chibe periodo dal %s al %s" % (primoMese_str, ultimoMese_str)
+					resoconto_email = "Report movimenti Chibe periodo dal %s al %s" % (primoMese_str, ultimoMese_str)
 
 					importo_speso_totale = tutti_acquisti.aggregate(Sum('importo'))['importo__sum']
 
@@ -285,13 +200,46 @@ def genera_fattura():
 							"mostra_info_pagamento": True,
 							"metodo_pagamento": "Bonifico",
 							"metodo_titoloN": "IBAN",
-							"metodo_descN": "IT76I0538702415000002570502",							
+							"metodo_descN": "IT76I0538702415000002570502",
+							"extra_anagrafica": {
+								"mail": email
+							},
 						}
 
 						data = json.dumps(data)
 
-						r = requests.post(url, data=data)
-						print r.json()
+						#r = requests.post(url, data=data)
+						#output = r.json()
+
+						#new_id = output['new_id']
+
+						#invio_email_fic(new_id, email, oggetto_email, descrizione)
+						email_fattura(p, tutti_acquisti, resoconto_email)
 						time.sleep(3)
-						email_fattura(p, tutti_acquisti, oggetto_email).delay()
+
+
+def invio_email_fic(id, mail_destinatario, oggetto, messaggio):
+	mail_destinatario = "senblet@gmail.com"
+
+	url = FATTURE_CLOUD_ENDPOINT + "/fatture/inviamail"
+
+	data = {
+		"api_uid" : FATTURE_CLOUD_API_UID,
+		"api_key" : FATTURE_CLOUD_API_KEY,	
+		"id" : id,
+		"mail_mittente" : "chibe@chibeapp.com",
+		"mail_destinatario" : mail_destinatario,
+		"oggetto" : oggetto,
+		"messaggio" : messaggio,
+		"allega_pdf" : True
+	}
+
+	data = json.dumps(data)
+
+	r = requests.post(url, data=data)
+	output = r.json()
+	print output
+
+
+
 
