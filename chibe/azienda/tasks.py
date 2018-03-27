@@ -208,19 +208,17 @@ def genera_fattura():
 
 						data = json.dumps(data)
 
-						#r = requests.post(url, data=data)
-						#output = r.json()
+						r = requests.post(url, data=data)
+						output = r.json()
 
-						#new_id = output['new_id']
+						new_id = output['new_id']
 
-						#invio_email_fic(new_id, email, oggetto_email, descrizione)
+						invio_email_fic(new_id, email, oggetto_email, descrizione)
 						email_fattura(p, tutti_acquisti, resoconto_email)
 						time.sleep(3)
 
 
 def invio_email_fic(id, mail_destinatario, oggetto, messaggio):
-	mail_destinatario = "senblet@gmail.com"
-
 	url = FATTURE_CLOUD_ENDPOINT + "/fatture/inviamail"
 
 	data = {

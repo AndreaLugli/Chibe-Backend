@@ -698,10 +698,19 @@ class utente_gruppo(View):
 		username = user.username
 		utente = Utente.objects.get(username = username)
 
-		gruppo = Gruppo.objects.get(pk = id)
+		gruppo = Gruppo.objects.select_related('desiderio').get(pk = id)
 
 		punti_piuma = request.POST['punti_piuma']
 		punti_piuma = int(punti_piuma)
+
+		punti_del_gruppo = gruppo.punti
+		desiderio = gruppo.desiderio
+		punti_piuma_desiderio = desiderio.punti_piuma()
+
+		delta_punti = punti_piuma_desiderio - punti_del_gruppo
+
+		if delta_punti < punti_piuma:
+			punti_piuma = delta_punti
 
 		PuntiGruppo.objects.create(gruppo = gruppo, utente = utente, punti = punti_piuma)
 
