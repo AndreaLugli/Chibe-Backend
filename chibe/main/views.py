@@ -1132,4 +1132,37 @@ def utente_invitecode(request):
 	codice = utente.codice
 	return HttpResponse(codice)
 
+from django.contrib.sessions.models import Session
+from django.contrib.auth.models import User
+
+@csrf_exempt
+def utente_session(request):
+	session_key = request.session.session_key
+
+	#logger.debug(session_key)
+
+	return HttpResponse(session_key)
+
+@csrf_exempt
+def utente_set_session(request):
+	session_key = request.POST['session_key']
+
+	session_esistenza = Session.objects.filter(session_key=session_key).exists()
+	if session_esistenza:
+		session = Session.objects.get(session_key=session_key)
+		uid = session.get_decoded().get('_auth_user_id')
+		user_esistenza = User.objects.filter(pk=uid).exists()
+		if user_esistenza:
+			user = User.objects.get(pk=uid)
+			login(request, user)
+			return HttpResponse('La session corrisponde alla email')
+		else:
+			return HttpResponseBadRequest('Errore: non riesco ad ottenere il nome utente')
+	else:
+		return HttpResponseBadRequest('Errore: la session non esiste')
+
+
+
+
+
 

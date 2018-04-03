@@ -22,6 +22,7 @@ from .views import utente_register_push
 from .views import register_by_access_token
 from .views import utente_invitecode
 from .views import utente_gruppo_riscatta, utente_gruppo_rimuovi
+from .views import utente_session, utente_set_session
 
 urlpatterns = [
 	url(r'^check_connected/$', check_connected, name = 'check_connected'),
@@ -59,5 +60,8 @@ urlpatterns = [
 	url(r'^register-by-token/(?P<backend>[^/]+)/$', register_by_access_token, name = 'register_by_access_token'),
 	url(r'^invite-code/$', utente_invitecode, name = 'utente_invitecode'),
 
+	url(r'^get-session/$', utente_session, name = 'utente_session'),
+	url(r'^set-session/$', utente_set_session, name = 'utente_set_session'),
+	
 ]
 
