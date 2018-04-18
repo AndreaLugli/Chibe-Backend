@@ -92,7 +92,8 @@ class SearchQueryset(models.query.QuerySet):
 		for su in self:
 			contratto = su.contratto
 			attivo = su.attivo
-			if contratto and attivo:
+			primario = su.primario
+			if contratto and attivo and primario:
 
 				is_valido = contratto.is_valid()
 				if is_valido:
@@ -173,6 +174,7 @@ class Partner(User):
 	telefono_cellulare = models.CharField(max_length = 300, )
 	descrizione = models.TextField()
 	contratto = models.ForeignKey(ContrattoMarketing, blank = True, null = True)
+	primario = models.BooleanField(default = True)
 
 	CATEGORIA_PARTNER = (
 		("RIS", "Food"),
