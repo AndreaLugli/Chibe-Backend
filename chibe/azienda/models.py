@@ -162,6 +162,7 @@ class PartneroManager(models.Manager):
 class Partner(User):
 	objects_search = PartneroManager()
 	ragione_sociale = models.CharField(max_length = 300)
+	ragione_sociale_fattura = models.CharField(max_length = 300, blank = True, null = True)
 	tripadvisor = models.CharField(max_length = 700, blank = True, null = True)
 	codice_fiscale = models.CharField(max_length = 300)
 	partita_iva = models.CharField(max_length = 300)

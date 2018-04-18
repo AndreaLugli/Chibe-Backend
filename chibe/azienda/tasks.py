@@ -153,6 +153,13 @@ def genera_fattura():
 					percentuale_marketing = contratto.percentuale_marketing
 
 					ragione_sociale = p.ragione_sociale
+					ragione_sociale_fattura = p.ragione_sociale_fattura
+
+					if ragione_sociale_fattura:
+						ragione_sociale_str = ragione_sociale_fattura
+					else:
+						ragione_sociale_str = ragione_sociale
+
 					partita_iva = p.partita_iva
 					codice_fiscale = p.codice_fiscale
 					indirizzo = p.indirizzo
@@ -171,7 +178,7 @@ def genera_fattura():
 						data = {
 							"api_uid" : FATTURE_CLOUD_API_UID,
 							"api_key" : FATTURE_CLOUD_API_KEY,
-							"nome" : ragione_sociale,
+							"nome" : ragione_sociale_str,
 							"indirizzo_via" : indirizzo,
 							"piva" : partita_iva,
 							"cf" : codice_fiscale,
