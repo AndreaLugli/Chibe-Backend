@@ -211,9 +211,9 @@ def genera_fattura():
 						r = requests.post(url, data=data)
 						output = r.json()
 
-						new_id = output['new_id']
-
-						invio_email_fic(new_id, email, oggetto_email, descrizione)
+						#new_id = output['new_id']
+						#invio_email_fic(new_id, email, oggetto_email, descrizione)
+						
 						email_fattura(p, tutti_acquisti, resoconto_email)
 						time.sleep(3)
 
