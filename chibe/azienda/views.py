@@ -268,7 +268,8 @@ class azienda_id(View):
 			"tribu" : tribu_str,
 			"tribu_1" : tribu_1,
 			"tribu_2" : tribu_2,
-			"percentuale" : percentuale
+			"percentuale" : percentuale,
+			"tripadvisor" : su.tripadvisor
 		}
 
 		return JsonResponse(json_su)
