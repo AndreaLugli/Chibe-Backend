@@ -5,8 +5,13 @@ from django.core.urlresolvers import reverse
 from django.views.generic import View
 from django.shortcuts import render
 from django.contrib import messages
-
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
 from azienda.models import Partner
+from django.conf import settings
+from .tasks import send_all_push
+
+IS_LOCAL = settings.IS_LOCAL
 
 class staff_index(View):
 	def dispatch(self, *args, **kwargs):
@@ -38,4 +43,30 @@ class staff_index(View):
 			
 		url = reverse('staff_index')
 		return HttpResponseRedirect(url)
+
+class staff_push(View):
+	@method_decorator(staff_member_required)
+	def dispatch(self, *args, **kwargs):
+		return super(staff_push, self).dispatch(*args, **kwargs)
+
+	def get(self, request, *args, **kwargs):
+
+		template_name = "staff_push.html"
+		return render(request, template_name)
+
+	def post(self, request, *args, **kwargs):
+		testo = request.POST['testo']
+
+		if IS_LOCAL:
+			send_all_push(testo)
+		else:
+			send_all_push.delay(testo)
+
+		messages.success(request, "Messaggio inviato")
+
+		url = reverse('staff_push')
+		return HttpResponseRedirect(url)
+
+
+
 
