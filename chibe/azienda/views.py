@@ -14,6 +14,8 @@ from django.utils import timezone
 from azienda.models import Partner, Categoria, Acquisto
 from main.models import Tribu, Utente, OrdineDesiderio
 
+CODICE_SPECIALE = "CHIBESPECIAL2018"
+
 import logging
 logger = logging.getLogger('django.request')
 
@@ -73,6 +75,7 @@ class azienda_fornitore(View):
 	def get(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
+
 		partner = Partner.objects.get(username = username)
 		is_fornitore = partner.is_fornitore
 
@@ -80,6 +83,36 @@ class azienda_fornitore(View):
 			return HttpResponse()
 		else:
 			return HttpResponseBadRequest()
+
+from desideri.models import PremioSpeciale
+def handle_special_code(partner):
+	premio_obj_ex = PremioSpeciale.objects.filter(partner = partner).exists()
+
+	if premio_obj_ex:
+		premio = PremioSpeciale.objects.get(partner = partner)
+
+		sku = premio.sku
+
+		if sku > 0:
+			new_sku = sku - 1
+
+			premio.sku = new_sku
+			premio.save()
+
+			desiderio_json = {
+				"id" : premio.id,
+				"nome" : premio.nome,
+				"descrizione_lunga" : "",
+				"immagine" : "",
+				"num_gruppo" : '',
+				"punti_piuma" : 0
+			}
+
+			return JsonResponse(desiderio_json, safe = False)
+		else:
+			return HttpResponseBadRequest("Premio non disponibile nell'attività")
+	else:
+		return HttpResponseBadRequest("Premio non disponibile nell'attività")
 
 class azienda_premio(View):
 	@method_decorator(csrf_exempt)
@@ -89,9 +122,13 @@ class azienda_premio(View):
 	def post(self, request, *args, **kwargs):
 		user = request.user
 		username = user.username
+
 		partner = Partner.objects.get(username = username)
 		token = request.POST['token']
 		token = token.replace(" ", "").strip()
+
+		if token == CODICE_SPECIALE:
+			return handle_special_code(partner)
 
 		ordine_ex = OrdineDesiderio.objects.filter(token = token).exists()
 
@@ -126,7 +163,6 @@ class azienda_premio(View):
 					return HttpResponseBadRequest("Premio non disponibile nell'attività")
 		else:
 			return HttpResponseBadRequest("Codice errato")
-
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from operator import itemgetter

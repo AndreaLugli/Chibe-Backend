@@ -53,5 +53,16 @@ class Desiderio(models.Model):
 		verbose_name = "Desiderio"
 		verbose_name_plural = "1. Desideri"	
 
+class PremioSpeciale(models.Model):
+	nome = models.CharField(max_length = 300, blank = True, null = True)
+	sku = models.IntegerField()
+
+	partner = models.ForeignKey("azienda.Partner", unique=True)
+
+	class Meta:
+		verbose_name='Premio speciale'
+		verbose_name_plural='Premi speciali'
+
+
 
 

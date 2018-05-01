@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from django.http import HttpResponse
 import unicodecsv as csv
-from .models import Desiderio, CategoriaDesiderio
+from .models import Desiderio, CategoriaDesiderio, PremioSpeciale
 
 @admin.register(CategoriaDesiderio)
 class CategoriaDesiderioAdmin(admin.ModelAdmin):
@@ -37,3 +37,7 @@ class DesiderioAdmin(admin.ModelAdmin):
 	list_display = ['nome', 'descrizione_breve', 'punti_piuma', 'costo_riscatto', 'data_inizio', 'data_fine', 'num_gruppo', 'sku', 'in_evidenza']
 
 	actions = [export_desiderio]
+
+@admin.register(PremioSpeciale)
+class PremioSpecialeAdmin(admin.ModelAdmin):
+	list_display = ['nome', 'sku', 'partner']
