@@ -32,7 +32,46 @@ def export_partner(modeladmin, request, queryset):
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
 	list_display = ['ragione_sociale', 'ragione_sociale_fattura', "email", "attivo", 'is_fornitore', "categoria_partner", "tribu", "orsi", "aquile", "lupi", "puma", "volpi", "primario"]
-	fields = ["logo", "banner", "username", "tripadvisor", "contratto", "first_name", "last_name", "email", "attivo", "categoria_partner", "ragione_sociale", "ragione_sociale_fattura", "codice_fiscale", "partita_iva", "indirizzo", "latitudine", "longitudine", "telefono_fisso", "telefono_cellulare", "descrizione", "categorie", "is_fornitore", "tribu", "orsi", "aquile", "lupi", "puma", "volpi", "primario"]
+	
+	fields = [
+		"logo", 
+		"banner", 
+		"username", 
+		"tripadvisor", 
+		"contratto", 
+		"first_name", 
+		"last_name", 
+		"email", 
+		"attivo", 
+		"categoria_partner", 
+		"ragione_sociale", 
+		"codice_fiscale", 
+		"partita_iva", 
+		"indirizzo", 
+		"latitudine", 
+		"longitudine", 
+		"telefono_fisso", 
+		"telefono_cellulare", 
+		"descrizione", 
+		"categorie", 
+		"is_fornitore", 
+		"tribu", 
+		"orsi", 
+		"aquile", 
+		"lupi", 
+		"puma", 
+		"volpi", 
+		"primario",
+		"ragione_sociale_fattura",
+		"indirizzo_via_fattura",
+		"indirizzo_cap",
+		"indirizzo_citta",
+		"indirizzo_provincia",
+		"indirizzo_extra",
+		"fax"	
+	]
+
+
 	actions = [export_partner]
 
 

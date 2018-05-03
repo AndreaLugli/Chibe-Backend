@@ -163,7 +163,6 @@ class PartneroManager(models.Manager):
 class Partner(User):
 	objects_search = PartneroManager()
 	ragione_sociale = models.CharField(max_length = 300, verbose_name = "Marchio")
-	ragione_sociale_fattura = models.CharField(max_length = 300, blank = True, null = True)
 	tripadvisor = models.CharField(max_length = 700, blank = True, null = True)
 	codice_fiscale = models.CharField(max_length = 300)
 	partita_iva = models.CharField(max_length = 300)
@@ -175,6 +174,15 @@ class Partner(User):
 	descrizione = models.TextField()
 	contratto = models.ForeignKey(ContrattoMarketing, blank = True, null = True)
 	primario = models.BooleanField(default = True)
+
+	# Dati fattura
+	ragione_sociale_fattura = models.CharField(max_length = 300, blank = True, null = True)
+	indirizzo_via_fattura = models.CharField(max_length = 300, blank = True, null = True)
+	indirizzo_cap = models.CharField(max_length = 300, blank = True, null = True)
+	indirizzo_citta = models.CharField(max_length = 300, blank = True, null = True)
+	indirizzo_provincia = models.CharField(max_length = 300, blank = True, null = True)
+	indirizzo_extra = models.CharField(max_length = 300, blank = True, null = True)
+	fax = models.CharField(max_length = 300, blank = True, null = True)
 
 	CATEGORIA_PARTNER = (
 		("RIS", "Food"),

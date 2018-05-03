@@ -165,6 +165,16 @@ def genera_fattura():
 					indirizzo = p.indirizzo
 					email = p.email
 
+					# Dati di pura fatturazione
+					# ragione_sociale_fattura gia incluso
+					indirizzo_via_fattura = p.indirizzo_via_fattura
+					indirizzo_cap = p.indirizzo_cap
+					indirizzo_citta = p.indirizzo_citta
+					indirizzo_provincia = p.indirizzo_provincia
+					indirizzo_extra = p.indirizzo_extra
+					telefono_fisso = p.telefono_fisso
+					fax = p.fax
+
 					if importo_speso_totale:
 						commissione = float(importo_speso_totale) * (percentuale_marketing / 100)
 						commissione = round(commissione, 2)
@@ -179,7 +189,11 @@ def genera_fattura():
 							"api_uid" : FATTURE_CLOUD_API_UID,
 							"api_key" : FATTURE_CLOUD_API_KEY,
 							"nome" : ragione_sociale_str,
-							"indirizzo_via" : indirizzo,
+							"indirizzo_via" : indirizzo_via_fattura,
+							"indirizzo_cap" : indirizzo_cap,
+							"indirizzo_citta" : indirizzo_citta,
+							"indirizzo_provincia" : indirizzo_provincia,
+							"indirizzo_extra" : indirizzo_extra,
 							"piva" : partita_iva,
 							"cf" : codice_fiscale,
 							"autocompila_anagrafica" : True,
@@ -209,7 +223,9 @@ def genera_fattura():
 							"metodo_titoloN": "IBAN",
 							"metodo_descN": "IT76I0538702415000002570502",
 							"extra_anagrafica": {
-								"mail": email
+								"mail": email,
+								"tel" : telefono_fisso,
+								"fax" : fax
 							},
 						}
 
