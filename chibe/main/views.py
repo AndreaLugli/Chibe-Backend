@@ -853,14 +853,18 @@ class utente_register_push(View):
 		sistema_operativo = request.POST['sistema_operativo']
 		token = request.POST['token']
 
-		p_ex = PushNotification.objects.filter(utente = utente, sistema_operativo = sistema_operativo, token = token).exists()
+		exists_push_so = PushNotification.objects.filter(utente = utente, sistema_operativo = sistema_operativo).exists()
+		if exists_push_so:
+			PushNotification.objects.filter(utente = utente, sistema_operativo = sistema_operativo).update(token = token)
+		else:
+			p_ex = PushNotification.objects.filter(utente = utente, sistema_operativo = sistema_operativo, token = token).exists()
 
-		if not p_ex:
-			PushNotification.objects.create(
-				utente = utente,
-				sistema_operativo = sistema_operativo,
-				token = token
-			)
+			if not p_ex:
+				PushNotification.objects.create(
+					utente = utente,
+					sistema_operativo = sistema_operativo,
+					token = token
+				)
 
 		return HttpResponse("")
 

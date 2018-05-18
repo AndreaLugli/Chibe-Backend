@@ -10,7 +10,7 @@ def push_generic(member, content):
 	send_push(member, content)
 
 def send_push(member, content):
-	all_push = PushNotification.objects.filter(utente = member) 
+	all_push = PushNotification.objects.filter(utente = member)
 	for push in all_push:
 		o_system = push.sistema_operativo
 		token = push.token

@@ -17,7 +17,7 @@ class CheckAuth(object):
 
 		path = request.path
 
-		if ("session" not in path) and ("invito/successo" not in path) and ("google-plus" not in path) and ("admin" not in path) and ("staff" not in path) and ("desideri/new" not in path) and ("azienda/search" not in path) and ("azienda/login" not in path) and ("/invito/" not in path) and ("/utente/register-by-token" not in path) and ("/utente/register" not in path) and ("/utente/check_connected/" not in path) and ("/utente/login" not in path) and ("/utente/forgot-password" not in path):
+		if ("get_code" not in path) and ("session" not in path) and ("invito/successo" not in path) and ("google-plus" not in path) and ("admin" not in path) and ("staff" not in path) and ("desideri/new" not in path) and ("azienda/search" not in path) and ("azienda/login" not in path) and ("/invito/" not in path) and ("/utente/register-by-token" not in path) and ("/utente/register" not in path) and ("/utente/check_connected/" not in path) and ("/utente/login" not in path) and ("/utente/forgot-password" not in path):
 			if is_authenticated:
 				response = self.get_response(request)
 				return response
