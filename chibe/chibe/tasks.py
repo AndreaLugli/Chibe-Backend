@@ -5,6 +5,7 @@ from celery import shared_task
 from django.conf import settings
 from gcm import GCM
 from gobiko.apns import APNsClient
+from main.models import PushNotification
 
 PATH_CERT = settings.PATH_CERT
 APNS_AUTH_KEY = PATH_CERT
@@ -25,7 +26,11 @@ def send_push_gcm(token, content):
 	gcm = GCM(google_api_key)
 	data = {'message': content, 'title' : 'Chibe'}
 
-	gcm.plaintext_request(registration_id=token, data=data)
+	try:
+		gcm.plaintext_request(registration_id=token, data=data)
+	except:
+		PushNotification.objects.filter(token = token).delete()
+		pass
 
 @shared_task
 def send_push_apns(token_hex, content, IS_LOCAL):
@@ -37,11 +42,16 @@ def send_push_apns(token_hex, content, IS_LOCAL):
 		use_sandbox=IS_LOCAL,
 		force_proto='h2'
 	)
-	client.send_message(
-		token_hex, 
-		content,
-		sound = "default"
-	)
+
+	try:
+		client.send_message(
+			token_hex, 
+			content,
+			sound = "default"
+		)
+	except:
+		PushNotification.objects.filter(token = token_hex).delete()
+		pass
 
 
 
