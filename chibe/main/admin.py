@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib import admin
 import unicodecsv as csv
-from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotification, PuntiGruppo, OrdineDesiderio
+from .models import Utente, OnBoard, Provincia, Scuola, Tribu, Gruppo, PushNotification, PuntiGruppo, OrdineDesiderio, ResetPassword
 from chibe.tasks import send_push_gcm, send_push_apns
 from django.http import HttpResponse
 
@@ -66,6 +66,10 @@ class ProvinciaAdmin(admin.ModelAdmin):
 
 @admin.register(Scuola)
 class ScuolaAdmin(admin.ModelAdmin):
+	pass
+
+@admin.register(ResetPassword)
+class ResetPasswordAdmin(admin.ModelAdmin):
 	pass
 
 @admin.register(Tribu)

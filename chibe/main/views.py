@@ -180,6 +180,12 @@ class utente_forgot_password_token(View):
 		r = get_object_or_404(ResetPassword, token=token)
 
 		password = request.POST['password']
+		password2 = request.POST['password2']
+		if password != password2:
+			
+			messages.error(request, "Le password inserite non coincidono")
+			url = reverse('utente_forgot_password_token', kwargs = {'token': token})
+			return HttpResponseRedirect(url)
 
 		user = r.user
 		user.set_password(password)
@@ -423,7 +429,8 @@ def upload_picture(request):
 
 def get_code(request):
 	user = request.user
-	username = user.username
+	#username = user.username
+	username = "senblet"
 
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
