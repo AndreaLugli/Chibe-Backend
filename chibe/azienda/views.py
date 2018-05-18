@@ -178,7 +178,7 @@ class azienda_search(View):
 		if (not latitude) and (not longitude):
 			return JsonResponse([], safe = False)
 
-		distanza = float(10)
+		distanza = float(50)
 
 		tipo = request.GET.get("tipo", "ZERO")
 
@@ -206,7 +206,7 @@ class azienda_search(View):
 				tribu_val = tribu.nome
 				partners = [d for d in partners if d['tribu'] == tribu_val]
 
-		paginator = Paginator(partners, 50)
+		paginator = Paginator(partners, 100)
 
 		#page = request.GET.get("page")
 
