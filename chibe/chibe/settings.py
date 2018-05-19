@@ -23,7 +23,7 @@ INSTALLED_APPS = [
 	'django_celery_beat',
 	'social_django',
 	'staff',
-	'snowpenguin.django.recaptcha2'
+	'snowpenguin.django.recaptcha2',
 ]
 
 RECAPTCHA_PUBLIC_KEY = '6LdvTEEUAAAAAAeRFNkxinkmyW5v76nzBzpvKC0w'

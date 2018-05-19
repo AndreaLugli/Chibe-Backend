@@ -13,7 +13,7 @@ DATABASES = {
 }
 
 STATICFILES_DIRS = [
-	'/Users/riccardo/Desktop/chibe/chibe/static',
+	'/Users/riccardo/Desktop/Progetti/chibe/chibe/static',
 ]
 
 MEDIA_ROOT = "/Users/riccardo/Desktop/Progetti/chibe/chibe/media" 

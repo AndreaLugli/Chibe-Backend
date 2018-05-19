@@ -1173,6 +1173,126 @@ def utente_set_session(request):
 		return HttpResponseBadRequest('Errore: la session non esiste')
 
 
+from azienda.models import Partner, Acquisto
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+def utente_test(request):
+
+	partner = Partner.objects.get(pk = 57)
+	#partner = Partner.objects.get(pk = 573)
+	#tutti_acquisti = Acquisto.objects.filter(partner = p, timestamp__month = mese, timestamp__year = anno)
+	acquisti = Acquisto.objects.select_related('utente', 'partner').filter(partner = partner)
+
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+
+	p = canvas.Canvas(response, pagesize=A4)
+
+	p.translate(0, 29.7 * cm)
+	p.setFont('Helvetica', 10)
+
+	p.saveState()
+	header_func(p)
+	p.restoreState()
+
+	p.saveState()
+	address_func(p, partner)
+	p.restoreState()
+
+	# Chibe
+	textobject = p.beginText(1.5 * cm, -3 * cm)
+	contact_name = "Chibe S.r.l"
+	textobject.textLine(contact_name)
+	address_one = "Via Masi, 21"
+	textobject.textLine(address_one)
+	address_two = "40137 Bologna"
+	textobject.textLine(address_two)
+	town = "amministrazione@chibe.it"
+	textobject.textLine(town)
+	p.drawText(textobject)
+
+
+	# Items
+	data = [[u'Codice utente', u'Data', u'Importo', u'FAMOCO'], ]
+	for item in acquisti:
+		utente = item.utente
+		timestamp = item.timestamp
+		partner_obj = item.partner
+
+		codice_utente = utente.codice
+		data_obj = timestamp.strftime("%d/%m/%Y %H:%M:%S")
+		importo = item.importo
+		famoco = partner_obj.username
+
+		data.append([codice_utente, data_obj, importo, famoco])
+
+	table = Table(data, colWidths=[4.75 * cm, 4.75 * cm, 4.75 * cm, 4.75 * cm])
+
+	# table.setStyle([
+	# 	('FONT', (0, 0), (-1, -1), 'Helvetica'),
+	# 	('FONTSIZE', (0, 0), (-1, -1), 10),
+	# 	('TEXTCOLOR', (0, 0), (-1, -1), (0.2, 0.2, 0.2)),
+	# 	('GRID', (0, 0), (-1, -2), 1, (0.7, 0.7, 0.7)),
+	# 	('GRID', (-2, -1), (-1, -1), 1, (0.7, 0.7, 0.7)),
+	# 	('ALIGN', (-2, 0), (-1, -1), 'CENTER'),
+	# 	('BACKGROUND', (0, 0), (-1, 0), (0.8, 0.8, 0.8)),
+	# ])
+
+
+	LIST_STYLE = TableStyle(
+		[('LINEABOVE', (0,0), (-1,0), 2, colors.green),
+		('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
+		('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
+		('ALIGN', (-2,0), (-1,-1), 'CENTER')]
+	)
+	table.setStyle(LIST_STYLE)
+
+	tw, th, = table.wrapOn(p, 15 * cm, 19 * cm)
+	table.drawOn(p, 1 * cm, -8 * cm - th)
+
+
+	p.showPage()
+	p.save()
+
+	return response
+
+def header_func(canvas):
+	""" Draws the invoice header """
+	canvas.setStrokeColorRGB(0.9, 0.5, 0.2)
+	canvas.setFillColorRGB(0.2, 0.2, 0.2)
+	canvas.setFont('Helvetica', 16)
+	canvas.drawString(1.5 * cm, -2 * cm, 'Report transazioni Chibe')
+
+def address_func(canvas, partner):
+    """ Draws the business address """
+    business_details = (
+        partner.ragione_sociale,
+        partner.ragione_sociale_fattura,
+        partner.indirizzo,
+        partner.email,
+        U'',
+        U'',
+        u'',
+        u'',
+        u'',
+        u'',
+        u'',
+        u''
+    )
+    canvas.setFont('Helvetica', 9)
+    textobject = canvas.beginText(13 * cm, -3 * cm)
+    for line in business_details:
+        textobject.textLine(line)
+    canvas.drawText(textobject)
+
+
+
+
+
+
 
 
 
