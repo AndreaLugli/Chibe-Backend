@@ -8,6 +8,12 @@ from django.db.models import Sum
 import csv
 import StringIO
 from django.core.mail import EmailMultiAlternatives
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+from io import BytesIO
 
 import requests
 import json
@@ -66,6 +72,58 @@ def check_tribu():
 			notifica_perdenti(p, old_t)
 			notifica_vincenti(p, t)
 
+def chunks(l, n):
+    n = max(1, n)
+    return (l[i:i+n] for i in xrange(0, len(l), n))
+
+def print_table(p, data_chucked):
+	data_chucked.pop(0)	
+	for data in data_chucked:
+		p.showPage()
+		table = Table(data, colWidths=[4.75 * cm, 4.75 * cm, 4.75 * cm, 4.75 * cm])
+
+		LIST_STYLE = TableStyle(
+			[('LINEABOVE', (0,0), (-1,0), 2, colors.HexColor("#6DD0DD")),
+			('LINEABOVE', (0,1), (-1,-1), 0.25, colors.HexColor("#6DD0DD")),
+			('LINEBELOW', (0,-1), (-1,-1), 2, colors.HexColor("#6DD0DD")),
+			('ALIGN', (-2,0), (-1,-1), 'CENTER')]
+		)
+		table.setStyle(LIST_STYLE)
+
+		tw, th, = table.wrapOn(p, 15 * cm, 19 * cm)	
+		table.drawOn(p, 1 * cm, 27.5 * cm - th)
+
+def header_func(canvas):
+	logo = "/Users/riccardo/Desktop/Progetti/chibe/chibe/static/homepage.png"
+
+	canvas.setStrokeColorRGB(0.9, 0.5, 0.2)
+	canvas.setFillColorRGB(0.2, 0.2, 0.2)
+	canvas.setFont('Helvetica', 16)
+	canvas.drawString(13 * cm, -2 * cm, 'Report transazioni Chibe')
+	canvas.drawInlineImage(logo, 1 * cm, -3 * cm, 3 * cm, 3 * cm)
+
+def address_func(canvas, partner):
+    """ Draws the business address """
+    business_details = (
+        partner.ragione_sociale,
+        partner.ragione_sociale_fattura,
+        partner.indirizzo,
+        partner.email,
+        U'',
+        U'',
+        u'',
+        u'',
+        u'',
+        u'',
+        u'',
+        u''
+    )
+    canvas.setFont('Helvetica', 9)
+    textobject = canvas.beginText(13 * cm, -4 * cm)
+    for line in business_details:
+        textobject.textLine(line)
+    canvas.drawText(textobject)
+
 @shared_task
 def email_fattura(partner, acquisti, oggetto_email):
 
@@ -81,37 +139,92 @@ def email_fattura(partner, acquisti, oggetto_email):
 		A presto,<br>\
 		Il team di Chibe" % (nome, ragione_sociale, indirizzo)
 
-	csvfile = StringIO.StringIO()
-	csvwriter = csv.writer(csvfile)
+	buffer = BytesIO()
 
-	csvwriter.writerow(['codice utente', 'data', 'importo', 'FAMOCO'])
+	p = canvas.Canvas(buffer, pagesize=A4)
 
-	for acquisto in acquisti:
-		utente = acquisto.utente
-		timestamp = acquisto.timestamp
-		p = acquisto.partner
+	p.translate(0, 29.7 * cm)
+	p.setFont('Helvetica', 10)
+
+	p.saveState()
+	header_func(p)
+	p.restoreState()
+
+	p.saveState()
+	address_func(p, partner)
+	p.restoreState()
+
+	# Chibe
+	textobject = p.beginText(1.5 * cm, -4 * cm)
+	contact_name = "Chibe S.r.l"
+	textobject.textLine(contact_name)
+	address_one = "Via Masi, 21"
+	textobject.textLine(address_one)
+	address_two = "40137 Bologna"
+	textobject.textLine(address_two)
+	town = "amministrazione@chibe.it"
+	textobject.textLine(town)
+	p.drawText(textobject)
+
+	# Items
+	data = [[u'Codice utente', u'Data', u'Importo', u'FAMOCO'], ]
+
+	for item in acquisti:
+		utente = item.utente
+		timestamp = item.timestamp
+		partner_obj = item.partner
 
 		codice_utente = utente.codice
-		data = timestamp.strftime("%d/%m/%Y %H:%M:%S")
-		importo = acquisto.importo
-		famoco = p.username
+		data_obj = timestamp.strftime("%d/%m/%Y %H:%M:%S")
+		importo = item.importo
+		famoco = partner_obj.username
 
-		csvwriter.writerow([codice_utente, data, importo, famoco])
+		data.append([codice_utente, data_obj, importo, famoco])
+
+	# Chunk a 30
+	data_chucked = chunks(data, 30)
+	data_chucked = list(data_chucked)
+
+	data_1 = data_chucked[0]
+	len_data_chuncked = len(data_chucked)
+
+	table = Table(data_1, colWidths=[4.75 * cm, 4.75 * cm, 4.75 * cm, 4.75 * cm])
+
+	LIST_STYLE = TableStyle(
+		[('LINEABOVE', (0,0), (-1,0), 2, colors.HexColor("#6DD0DD")),
+		('LINEABOVE', (0,1), (-1,-1), 0.25, colors.HexColor("#6DD0DD")),
+		('LINEBELOW', (0,-1), (-1,-1), 2, colors.HexColor("#6DD0DD")),
+		('ALIGN', (-2,0), (-1,-1), 'CENTER')]
+	)
+	table.setStyle(LIST_STYLE)
+
+	tw, th, = table.wrapOn(p, 15 * cm, 19 * cm)
+	table.drawOn(p, 1 * cm, -8 * cm - th)
+
+	# Inizio chunk
+	if len_data_chuncked > 1:
+		print_table(p, data_chucked)
+	# Fine chunk
+
+	p.showPage()
+	p.save()
+
+	pdf = buffer.getvalue()
+	buffer.close()
 
 	from_email = 'chibe@chibeapp.com'
 	to = email
 	cc = "info@chibe.it"
 	subject = oggetto_email
 
-	nomefile = "movimenti.csv"
+	nomefile = "movimenti.pdf"
 
 	html_content = testo_email
 	text_content = html_content
 	msg = EmailMultiAlternatives(subject, text_content, from_email, [to, cc])
 	msg.attach_alternative(html_content, "text/html") 
-	msg.attach(nomefile, csvfile.getvalue(), 'text/csv')       
+	msg.attach(nomefile, pdf, 'text/csv')       
 	msg.send()
-
 
 @shared_task
 def genera_fattura():
