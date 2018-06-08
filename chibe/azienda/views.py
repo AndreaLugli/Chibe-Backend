@@ -84,7 +84,7 @@ class azienda_fornitore(View):
 		else:
 			return HttpResponseBadRequest()
 
-from desideri.models import PremioSpeciale
+from desideri.models import PremioSpeciale, AcquistoSpeciale
 def handle_special_code(partner):
 	premio_obj_ex = PremioSpeciale.objects.filter(partner = partner).exists()
 
@@ -94,6 +94,9 @@ def handle_special_code(partner):
 		sku = premio.sku
 
 		if sku > 0:
+
+			AcquistoSpeciale.objects.create(premio = premio)
+
 			new_sku = sku - 1
 
 			premio.sku = new_sku

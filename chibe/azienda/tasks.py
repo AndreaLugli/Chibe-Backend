@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from io import BytesIO
+from desideri.models import AcquistoSpeciale, PremioSpeciale
 
 import requests
 import json
@@ -94,7 +95,8 @@ def print_table(p, data_chucked):
 		table.drawOn(p, 1 * cm, 27.5 * cm - th)
 
 def header_func(canvas):
-	logo = "/Users/riccardo/Desktop/Progetti/chibe/chibe/static/homepage.png"
+	#logo = "/Users/riccardo/Desktop/Progetti/chibe/chibe/static/homepage.png"
+	logo = "/home/django/static/homepage.png"
 
 	canvas.setStrokeColorRGB(0.9, 0.5, 0.2)
 	canvas.setFillColorRGB(0.2, 0.2, 0.2)
@@ -227,6 +229,115 @@ def email_fattura(partner, acquisti, oggetto_email):
 	msg.send()
 
 @shared_task
+def check_premiospeciale():
+	today = date.today()
+	yesterday = today - timedelta(days = 1)
+	yesterday_str = yesterday.strftime("%d/%m/%Y") 
+
+	partners = Partner.objects.select_related("contratto").filter(attivo = True)
+
+	for partner_obj in partners:
+		acquisti_speciali = AcquistoSpeciale.objects.select_related('premio').filter(timestamp__date = yesterday, premio__partner = partner_obj)
+		if acquisti_speciali:
+			num_acquisti_speciali = acquisti_speciali.count()
+			premio_s = PremioSpeciale.objects.get(partner = partner_obj)
+
+			desiderio_speciale_str = premio_s.nome
+			rimanenze = premio_s.sku
+
+			nome = partner_obj.get_full_name()
+			ragione_sociale = partner_obj.ragione_sociale
+			indirizzo = partner_obj.indirizzo
+			email = partner_obj.email
+
+			oggetto_email = "Report desideri speciali"
+
+			testo_email = "\
+				Gentile %s,<br>\
+				in allegato trova il report giornaliero relativo alla data %s con gli acquisti del desiderio speciale '%s' fatti dai nostri Chibers nel suo locale %s in %s.<br><br>\
+				Per qualunque informazione non esiti a contattarci alla nostra email info@chibe.it<br><br>\
+				A presto,<br>\
+				Il team di Chibe" % (nome, yesterday_str, desiderio_speciale_str, ragione_sociale, indirizzo)		
+
+			buffer = BytesIO()
+
+			p = canvas.Canvas(buffer, pagesize=A4)
+
+			p.translate(0, 29.7 * cm)
+			p.setFont('Helvetica', 10)
+
+			p.saveState()
+			header_func(p)
+			p.restoreState()
+
+			p.saveState()
+			address_func(p, partner_obj)
+			p.restoreState()
+
+			# Chibe
+			textobject = p.beginText(1.5 * cm, -4 * cm)
+			contact_name = "Chibe S.r.l"
+			textobject.textLine(contact_name)
+			address_one = "Via Masi, 21"
+			textobject.textLine(address_one)
+			address_two = "40137 Bologna"
+			textobject.textLine(address_two)
+			town = "amministrazione@chibe.it"
+			textobject.textLine(town)
+			textobject.textLine("")
+			unita_ri = "Desideri speciali ritirati: " + str(num_acquisti_speciali)
+			textobject.textLine(unita_ri)
+			unita_ri = "Desideri speciali rimanenti: " + str(rimanenze)
+			textobject.textLine(unita_ri)			
+			p.drawText(textobject)
+
+			# Items
+			data = [[u'Data', u'FAMOCO'], ]
+
+			for item in acquisti_speciali:
+				timestamp = item.timestamp
+				partner_obj = item.premio.partner
+
+				data_obj = timestamp.strftime("%d/%m/%Y %H:%M:%S")
+				famoco = partner_obj.username
+
+				data.append([data_obj, famoco])
+
+			table = Table(data, colWidths=[4.75 * cm, 4.75 * cm, 4.75 * cm, 4.75 * cm])
+
+			LIST_STYLE = TableStyle(
+				[('LINEABOVE', (0,0), (-1,0), 2, colors.HexColor("#6DD0DD")),
+				('LINEABOVE', (0,1), (-1,-1), 0.25, colors.HexColor("#6DD0DD")),
+				('LINEBELOW', (0,-1), (-1,-1), 2, colors.HexColor("#6DD0DD")),
+				('ALIGN', (-2,0), (-1,-1), 'CENTER')]
+			)
+			table.setStyle(LIST_STYLE)
+
+			tw, th, = table.wrapOn(p, 15 * cm, 19 * cm)
+			table.drawOn(p, 1 * cm, -8 * cm - th)
+
+			p.showPage()
+			p.save()
+
+			pdf = buffer.getvalue()
+			buffer.close()
+
+			from_email = 'chibe@chibeapp.com'
+			to = email
+			cc = "info@chibe.it"
+			subject = oggetto_email
+
+			nomefile = "movimenti_speciali.pdf"
+
+			html_content = testo_email
+			text_content = html_content
+			msg = EmailMultiAlternatives(subject, text_content, from_email, [to, cc])
+			msg.attach_alternative(html_content, "text/html") 
+			msg.attach(nomefile, pdf, 'text/csv')       
+			msg.send()
+
+
+@shared_task
 def genera_fattura():
 	today = date.today()
 	today_str = today.strftime("%d/%m/%Y") 
@@ -258,7 +369,6 @@ def genera_fattura():
 
 					descrizione = "Contratto marketing del %s - Periodo di fatturazione dal giorno %s al giorno %s" % (inizio.strftime("%d/%m/%Y"), primoMese_str, ultimoMese_str) 
 
-					oggetto_email = "Fattura Chibe periodo dal %s al %s" % (primoMese_str, ultimoMese_str)
 					resoconto_email = "Report movimenti Chibe periodo dal %s al %s" % (primoMese_str, ultimoMese_str)
 
 					importo_speso_totale = tutti_acquisti.aggregate(Sum('importo'))['importo__sum']
@@ -277,9 +387,6 @@ def genera_fattura():
 					codice_fiscale = p.codice_fiscale
 					indirizzo = p.indirizzo
 					email = p.email
-
-					# Dati di pura fatturazione
-					# ragione_sociale_fattura gia incluso
 					indirizzo_via_fattura = p.indirizzo_via_fattura
 					indirizzo_cap = p.indirizzo_cap
 					indirizzo_citta = p.indirizzo_citta
@@ -346,12 +453,11 @@ def genera_fattura():
 
 						r = requests.post(url, data=data)
 						output = r.json()
-
-						#new_id = output['new_id']
-						#invio_email_fic(new_id, email, oggetto_email, descrizione)
+						print output
 						
 						email_fattura(p, tutti_acquisti, resoconto_email)
 						time.sleep(3)
+						print "-"
 
 
 def invio_email_fic(id, mail_destinatario, oggetto, messaggio):

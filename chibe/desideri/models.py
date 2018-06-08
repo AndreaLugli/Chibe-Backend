@@ -64,5 +64,14 @@ class PremioSpeciale(models.Model):
 		verbose_name_plural='Premi speciali'
 
 
+class AcquistoSpeciale(models.Model):
+	premio = models.ForeignKey(PremioSpeciale)
+	timestamp = models.DateTimeField(auto_now_add = True)
+	#timestamp.editable=True
+
+	class Meta:
+		verbose_name = "Acquisto premio speciale"
+		verbose_name_plural = "Acquisti premi speciali"
+
 
 

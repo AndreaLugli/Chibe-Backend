@@ -429,8 +429,7 @@ def upload_picture(request):
 
 def get_code(request):
 	user = request.user
-	#username = user.username
-	username = "senblet"
+	username = user.username
 
 	utente = Utente.objects.get(username = username)
 	codice = utente.codice
@@ -1172,15 +1171,10 @@ def utente_set_session(request):
 	else:
 		return HttpResponseBadRequest('Errore: la session non esiste')
 
-
-from azienda.models import Partner, Acquisto
-from azienda.tasks import email_fattura
+from azienda.tasks import check_premiospeciale
 def utente_test(request):
 
-	partner = Partner.objects.get(pk = 57)
-	acquisti = Acquisto.objects.select_related('utente', 'partner').filter(partner = partner)
-
-	email_fattura(partner, acquisti, "oggetto_email")
+	check_premiospeciale()
 
 	return HttpResponse()
 
